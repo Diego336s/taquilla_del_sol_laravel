@@ -15,10 +15,10 @@ return new class extends Migration
             $table->id("cliente_id");
             $table->string("nombre");
             $table->string("apellido");
-            $table->string("documento");
+            $table->string("documento")->unique();
             $table->date("fecha_nacimiento");
             $table->string("telefono");
-            $table->string("correo");
+            $table->string("correo")->unique();
             $table->string("clave");
             $table->timestamps();
         });
