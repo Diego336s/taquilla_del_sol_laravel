@@ -69,6 +69,19 @@ class EmpresaController extends Controller
         return response()->json($empresa, 200);
     }
 
+    public function cambioCable(Request $request, string $id)
+    {
+        $empresa = Empresa::findOrFail($id);
+        $validated = $request->validate([
+            'clave' => 'required|string|max:6',
+        ]);
+
+        // Encriptar la clave
+        $validated['clave'] = Hash::make($validated['clave']);
+        $empresa->update($validated);
+        return response()->json(['message' => 'Clave actualizada correctamente'], 200);
+    }
+
 
     public function destroy(string $id)
     {
