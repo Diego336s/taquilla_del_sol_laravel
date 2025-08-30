@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Empresa;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 
 class EmpresaController extends Controller
 {
@@ -20,12 +21,12 @@ class EmpresaController extends Controller
     {
         $validated = $request->validate([
             'nombre_empresa'          => 'required|string|max:200',
-            'nit'                     => 'required|string|max:50|unique:empresas,nit',
+            'nit'                     => 'required|string|max:50',
             'representante_legal'     => 'required|string|max:200',
-            'documento_representante' => 'required|string|max:15',
+            'documento_representante' => 'required|integer|max:10',
             'nombre_contacto'         => 'nullable|string|max:200',
             'telefono'                => 'nullable|string|max:20',
-            'correo'                  => 'required|email|max:200|unique:empresas,correo',
+            'correo'                  => 'required|email|max:200',
             'clave'                   => 'required|string|max:200',
         ]);
 
@@ -60,7 +61,7 @@ class EmpresaController extends Controller
 
         // Encriptar la clave si viene en la actualización
         if (isset($validated['clave'])) {
-            $validated['clave'] = bcrypt($validated['clave']);
+            $validated['clave'] = Hash::make($validated['clave']);
         }
 
         $empresa->update($validated);
