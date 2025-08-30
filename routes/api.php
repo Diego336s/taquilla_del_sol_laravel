@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AdministradoresController;
+use App\Http\Controllers\CategoriasController;
 use App\Http\Controllers\ClientesController;
 use App\Http\Controllers\EmpresaController   ;
 use Illuminate\Http\Request;
@@ -26,3 +27,8 @@ Route::post("registrarEmpresa", [EmpresaController::class, "store"]);
 Route::put("actualizarEmpresa/{id}", [EmpresaController::class, "update"]);
 Route::delete("eliminarEmpresa/{id}", [EmpresaController::class, "destroy"]);
 Route::put("cambiarClave/{id}", [EmpresaController::class, "cambiarClave"]);
+
+Route::get("listarCategorias", [CategoriasController::class, "index"]);
+Route::post("registrarCategoria", [CategoriasController::class, "store"]);
+Route::put("actualizarCategoria/{id}", [CategoriasController::class, "update"]);
+Route::delete("eliminarCategoria/{id}", [CategoriasController::class, "destroy"]);
