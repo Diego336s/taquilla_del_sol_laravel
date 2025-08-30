@@ -8,8 +8,13 @@ Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
 
+<<<<<<< HEAD
 Route::get("listarClientes", [clientes::class, "index"]);
 Route::post("registrarCliente", [clientes::class, "store"]);
 Route::put("actualizarCliente/{id}", [clientes::class, "update"]);
 Route::delete("eliminarCliente/{id}", [clientes::class, "destroy"]);
 Route::put("cambiarClave/{id}", [clientes::class, "cambiarClave"]);
+=======
+
+
+>>>>>>> 6cd7907b77860ad4f65294794920ff58c7e7d704
