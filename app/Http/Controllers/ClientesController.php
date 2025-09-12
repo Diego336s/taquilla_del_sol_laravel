@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\clientes;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 
 class ClientesController extends Controller
@@ -46,7 +47,14 @@ class ClientesController extends Controller
 
 
         $cliente = clientes::create($datos);
-        return response()->json($cliente, 201);
+        $token = $cliente->createToken("auth_token", ["Cliente"])->plainTextToken;
+        return response()->json([
+            "success" => true,
+            "message" => "Cliente $request->nombre registrado correctamente",
+            "user" => $cliente,
+            "token_access" => $token,
+            "token_type" => "Bearer"
+        ]);
     }
 
     public function show(string $id)
@@ -132,5 +140,36 @@ class ClientesController extends Controller
 
         $cliente = clientes::update($validator_clave->validated());
         return response()->json($cliente, 200);
+    }
+
+    public function login(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            "correo" => "required|email",
+            "clave" => "required|string|min:6"
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                "success" => false,
+                "error" => $validator->errors()
+            ], 402);
+        }
+
+        $cliente = clientes::where("correo", $request->correo)->first();
+
+        if (!$cliente || !Hash::check($request->clave, $cliente->clave)) {
+            return response()->json([
+                "success" => false,
+                "error" => "Credenciales incorrectas",
+            ], 401);
+        }
+
+        $token = $cliente->createToken("auth_token", ["Cliente"])->plainTextToken;
+        return response()->json([
+            "success" => true,
+            "token" => $token,
+            "token_type" => "Bearer"
+        ]);
     }
 }
