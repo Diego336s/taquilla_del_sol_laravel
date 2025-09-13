@@ -36,8 +36,16 @@ class AdministradoresController extends Controller
         $validatedData['clave'] = Hash::make($validatedData['clave']);
 
         $administradores = Administradores::create($validatedData);
+         $token = $administradores->createToken("auth_token", ["Admin"])->plainTextToken;
+        return response()->json([
+            "success" => true,
+            "message" => "Administrador $request->nombre registrado correctamente",
+            "user" => $administradores,
+            "token_access" => $token,
+            "token_type" => "Bearer"
+        ]); 
 
-        return response()->json($administradores, 201);
+       
     }
 
     public function show(string $id)
@@ -99,4 +107,37 @@ class AdministradoresController extends Controller
         return response()->json(['message' => 'Administrador eliminado correctamente']);
     }
 
+     public function login(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            "correo" => "required|email",
+            "clave" => "required|string|min:6"
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                "success" => false,
+                "error" => $validator->errors()
+            ], 402);
+        }
+
+        $admin = Administradores::where("correo", $request->correo)->first();
+
+        if (!$admin || !Hash::check($request->clave, $admin->clave)) {
+            return response()->json([
+                "success" => false,
+                "error" => "Credenciales incorrectas",
+            ], 401);
+        }
+
+        $token = $admin->createToken("auth_token", ["Admin"])->plainTextToken;
+        return response()->json([
+            "success" => true,
+            "token" => $token,
+            "token_type" => "Bearer"
+        ]);
+    }
+
 }
+
+
