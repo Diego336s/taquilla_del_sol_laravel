@@ -4,6 +4,7 @@ use App\Http\Controllers\AdministradoresController;
 use App\Http\Controllers\CategoriasController;
 use App\Http\Controllers\ClientesController;
 use App\Http\Controllers\EmpresaController   ;
+use App\Http\Controllers\EventosController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -11,24 +12,34 @@ Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
 
+//Clientes
 Route::get("listarClientes", [ClientesController::class, "index"]);
 Route::post("registrarCliente", [ClientesController::class, "store"]);
 Route::put("actualizarCliente/{id}", [ClientesController::class, "update"]);
 Route::delete("eliminarCliente/{id}", [ClientesController::class, "destroy"]);
 Route::put("cambiarClave/{id}", [ClientesController::class, "cambiarClave"]);
 
+//Administradores
 Route::get("listarAdministradores", [AdministradoresController::class, "index"]);
 Route::post("registrarAdministradores", [AdministradoresController::class, "store"]);
 Route::put("actualizarAdministradores/{id}", [AdministradoresController::class, "update"]);
 Route::put("cambiarClave/{id}", [AdministradoresController::class, "cambiarClave"]);
 
+//Empresas
 Route::get("listarEmpresas", [EmpresaController::class, "index"]);
 Route::post("registrarEmpresa", [EmpresaController::class, "store"]);
 Route::put("actualizarEmpresa/{id}", [EmpresaController::class, "update"]);
 Route::delete("eliminarEmpresa/{id}", [EmpresaController::class, "destroy"]);
 Route::put("cambiarClave/{id}", [EmpresaController::class, "cambiarClave"]);
 
+//Categorias
 Route::get("listarCategorias", [CategoriasController::class, "index"]);
 Route::post("registrarCategoria", [CategoriasController::class, "store"]);
 Route::put("actualizarCategoria/{id}", [CategoriasController::class, "update"]);
 Route::delete("eliminarCategoria/{id}", [CategoriasController::class, "destroy"]);
+
+//Eventos
+Route::get("listarEventos", [EventosController::class, "index"]);
+Route::post("registrarEventos", [EventosController::class, "store"]);
+Route::put("actualizarEventos/{id}", [EventosController::class, "update"]);
+Route::delete("eliminarEventos/{id}", [EventosController::class, "destroy"]);
