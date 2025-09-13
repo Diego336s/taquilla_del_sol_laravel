@@ -5,6 +5,7 @@ use App\Http\Controllers\CategoriasController;
 use App\Http\Controllers\ClientesController;
 use App\Http\Controllers\EmpresaController   ;
 use App\Http\Controllers\EventosController;
+use App\Http\Controllers\TicketController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -43,3 +44,9 @@ Route::get("listarEventos", [EventosController::class, "index"]);
 Route::post("registrarEventos", [EventosController::class, "store"]);
 Route::put("actualizarEventos/{id}", [EventosController::class, "update"]);
 Route::delete("eliminarEventos/{id}", [EventosController::class, "destroy"]);
+
+//Tickets
+Route::get("listarTickets", [TicketController::class, "index"]);
+Route::post("registrarTickets", [TicketController::class, "store"]);
+Route::put("actualizarTickets/{id}", [TicketController::class, "update"]);
+Route::delete("eliminarTickets/{id}", [TicketController::class, "destroy"]);
