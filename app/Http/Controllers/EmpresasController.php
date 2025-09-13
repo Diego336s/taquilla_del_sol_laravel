@@ -33,7 +33,15 @@ class EmpresaController extends Controller
         $validated['clave'] = bcrypt($validated['clave']);
         $empresa = Empresa::create($validated);
 
-        return response()->json($empresa, 201);
+        $token = $empresa->createToken("auth_token", ["Empresa"])->plainTextToken;
+
+        return response()->json([
+            "success" => true,
+            "message" => "Empresa $request->nombre registrada correctamente",
+            "user" => $empresa,
+            "token_access" => $token,
+            "token_type" => "Bearer"
+        ]);
     }
 
     // Mostrar una empresa por ID
