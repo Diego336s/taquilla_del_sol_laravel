@@ -7,6 +7,7 @@ use App\Http\Controllers\EmpresaController   ;
 use App\Http\Controllers\EventosController;
 use App\Http\Controllers\PagosController;
 use App\Http\Controllers\TicketController;
+use App\Http\Controllers\AsientosController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -59,8 +60,8 @@ Route::put("actualizarPagos/{id}", [PagosController::class, "update"]);
 Route::delete("eliminarPagos/{id}", [PagosController::class, "destroy"]);
 
 //Asientos
-Route::get("listarAsientos", [App\Http\Controllers\AsientosController::class, "index"]);
-Route::post("registrarAsientos", [App\Http\Controllers\AsientosController::class, "store"]);
-Route::get("mostrarAsiento/{id}", [App\Http\Controllers\AsientosController::class, "show"]);
-Route::put("actualizarAsientos/{id}", [App\Http\Controllers\AsientosController::class, "update"]);
-Route::delete("eliminarAsientos/{id}", [App\Http\Controllers\AsientosController::class, "destroy"]); 
+Route::get("listarAsientos", [AsientosController::class, "index"]);
+Route::post("registrarAsientos", [AsientosController::class, "store"]);
+Route::get("mostrarAsiento/{id}", [AsientosController::class, "show"]);
+Route::put("actualizarAsientos/{id}", [AsientosController::class, "update"]);
+Route::delete("eliminarAsientos/{id}", [AsientosController::class, "destroy"]); 
