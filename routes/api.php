@@ -57,3 +57,10 @@ Route::get("listarPagos", [PagosController::class, "index"]);
 Route::post("registrarPagos", [PagosController::class, "store"]);
 Route::put("actualizarPagos/{id}", [PagosController::class, "update"]);
 Route::delete("eliminarPagos/{id}", [PagosController::class, "destroy"]);
+
+//Asientos
+Route::get("listarAsientos", [App\Http\Controllers\AsientosController::class, "index"]);
+Route::post("registrarAsientos", [App\Http\Controllers\AsientosController::class, "store"]);
+Route::get("mostrarAsiento/{id}", [App\Http\Controllers\AsientosController::class, "show"]);
+Route::put("actualizarAsientos/{id}", [App\Http\Controllers\AsientosController::class, "update"]);
+Route::delete("eliminarAsientos/{id}", [App\Http\Controllers\AsientosController::class, "destroy"]); 
