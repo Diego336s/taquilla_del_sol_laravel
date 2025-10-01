@@ -14,8 +14,9 @@ Route::get('/user', function (Request $request) {
 })->middleware('auth:sanctum');
 
 //Clientes
+Route::get("login/cliente", [ClientesController::class, "login"]);
 Route::get("listarClientes", [ClientesController::class, "index"]);
-Route::post("registrarCliente", [ClientesController::class, "store"]);
+Route::post("registrar/cliente", [ClientesController::class, "store"]);
 Route::put("actualizarCliente/{id}", [ClientesController::class, "update"]);
 Route::delete("eliminarCliente/{id}", [ClientesController::class, "destroy"]);
 Route::put("cambiarClave/{id}", [ClientesController::class, "cambiarClave"]);
