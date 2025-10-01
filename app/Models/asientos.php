@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
-class asientos extends Model
+class Asientos extends Model
 {
     use HasApiTokens, Notifiable;
     protected $fillable =[
