@@ -95,8 +95,7 @@ class ClientesController extends Controller
             "apellido" => "string",
             "documento" => "integer|unique:clientes,documento",
             "fecha_nacimiento" => "date",
-            "telefono" => "integer",
-            "correo" => "email|unique:clientes,correo"
+            "telefono" => "integer"           
         ]);
 
         if ($validator->fails()) {
