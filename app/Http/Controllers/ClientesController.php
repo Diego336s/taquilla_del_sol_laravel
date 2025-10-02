@@ -26,23 +26,16 @@ class ClientesController extends Controller
             "fecha_nacimiento" => "required|date",
             "telefono" => "required|integer",
             "correo" => "required|email|unique:clientes,correo",
-        ]);
-
-        $validator_clave = Validator::make($request->all(), [
             "clave" => "required|string|min:6"
         ]);
+
 
         if ($validator_datos->fails()) {
             return response()->json([
                 "success" => false,
                 "error" => $validator_datos->errors()
             ], 400);
-        } else if ($validator_clave->fails()) {
-            return response()->json([
-                "success" => false,
-                "error" => $validator_clave->errors()
-            ], 400);
-        };
+        }
 
         $correoExistenteCliente = clientes::where("correo", $request->correo)->exists();
         $correoExistenteEmpresa = Empresa::where("correo", $request->correo)->exists();
@@ -54,12 +47,15 @@ class ClientesController extends Controller
             ]);
         }
 
-        $datos = $validator_datos->validated();
-        $datos["clave"] = $validator_clave->validated();
-
-
-
-        $cliente = clientes::create($datos);
+        $cliente = clientes::create([
+            "nombre" => $request->nombre,
+            "apellido" => $request->apellido,
+            "documento" => $request->documento,
+            "fecha_nacimiento" => $request->fecha_nacimiento,
+            "telefono" => $request->telefono,
+            "correo" => $request->correo,
+            "clave" => Hash::make($request->clave)
+        ]);
         $token = $cliente->createToken("auth_token", ["Cliente"])->plainTextToken;
         return response()->json([
             "success" => true,
