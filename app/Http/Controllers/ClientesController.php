@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Administradores;
 use App\Models\clientes;
+use App\Models\Empresa;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
@@ -41,6 +43,17 @@ class ClientesController extends Controller
                 "error" => $validator_clave->errors()
             ], 400);
         };
+
+        $correoExistenteCliente = clientes::where("correo", $request->correo)->exists();
+        $correoExistenteEmpresa = Empresa::where("correo", $request->correo)->exists();
+        $correoExistenteAdministradores = Administradores::where("correo", $request->correo)->exists();
+        if ($correoExistenteAdministradores || $correoExistenteCliente || $correoExistenteEmpresa) {
+            return response()->json([
+                "success" => false,
+                "message" => "Correo $request->correo ya se encuetra registrado."
+            ]);
+        }
+
         $datos = $validator_datos->validated();
         $datos["clave"] = $validator_clave->validated();
 
@@ -152,7 +165,7 @@ class ClientesController extends Controller
         if ($validator->fails()) {
             return response()->json([
                 "success" => false,
-                "error" => $validator->errors()
+                "message" => $validator->errors()
             ], 402);
         }
 
@@ -161,13 +174,14 @@ class ClientesController extends Controller
         if (!$cliente || !Hash::check($request->clave, $cliente->clave)) {
             return response()->json([
                 "success" => false,
-                "error" => "Credenciales incorrectas",
+                "message" => "Credenciales incorrectas",
             ], 401);
         }
 
         $token = $cliente->createToken("auth_token", ["Cliente"])->plainTextToken;
         return response()->json([
             "success" => true,
+            "message" => "Inicio de sesion exitoso",
             "token" => $token,
             "token_type" => "Bearer"
         ]);
