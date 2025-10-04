@@ -3,7 +3,7 @@
 use App\Http\Controllers\AdministradoresController;
 use App\Http\Controllers\CategoriasController;
 use App\Http\Controllers\ClientesController;
-use App\Http\Controllers\EmpresaController   ;
+use App\Http\Controllers\EmpresaController;
 use App\Http\Controllers\EventosController;
 use App\Http\Controllers\PagosController;
 use App\Http\Controllers\TicketController;
@@ -11,14 +11,25 @@ use App\Http\Controllers\AsientosController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/user', function (Request $request) {
-    return $request->user();
-})->middleware('auth:sanctum');
+// Route::get('/user', function (Request $request) {
+//     return $request->user();
+// })->middleware('auth:sanctum');
+
+Route::post("login/cliente", [ClientesController::class, "login"]);
+Route::post("registrar/cliente", [ClientesController::class, "store"]);
+
+Route::middleware(["auth:sanctum"])->group(function () {
+    //Acesso Clientes
+    Route::middleware("ability:Cliente")->group(function () {
+        Route::get("me/cliente", [ClientesController::class, "me"]);
+        Route::post("logot/cliente", [ClientesController::class, "loguot"]);
+    });
+});
 
 //Clientes
-Route::get("login/cliente", [ClientesController::class, "login"]);
+
 Route::get("listarClientes", [ClientesController::class, "index"]);
-Route::post("registrar/cliente", [ClientesController::class, "store"]);
+
 Route::put("actualizarCliente/{id}", [ClientesController::class, "update"]);
 Route::delete("eliminarCliente/{id}", [ClientesController::class, "destroy"]);
 Route::put("cambiarClave/{id}", [ClientesController::class, "cambiarClave"]);
@@ -65,4 +76,4 @@ Route::get("listarAsientos", [AsientosController::class, "index"]);
 Route::post("registrarAsientos", [AsientosController::class, "store"]);
 Route::get("mostrarAsiento/{id}", [AsientosController::class, "show"]);
 Route::put("actualizarAsientos/{id}", [AsientosController::class, "update"]);
-Route::delete("eliminarAsientos/{id}", [AsientosController::class, "destroy"]); 
+Route::delete("eliminarAsientos/{id}", [AsientosController::class, "destroy"]);

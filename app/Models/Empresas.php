@@ -7,12 +7,11 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
-class Empresa extends Model
+class Empresas extends Model
 {
     use HasApiTokens, Notifiable;
-    use HasFactory;
-    protected $table = 'empresa';
-    protected $primaryKey = 'id';
+    use HasFactory;    
+    
 
     protected$fillable = [
             'nombre_empresa',

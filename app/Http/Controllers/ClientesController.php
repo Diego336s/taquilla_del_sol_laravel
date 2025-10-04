@@ -4,13 +4,21 @@ namespace App\Http\Controllers;
 
 use App\Models\Administradores;
 use App\Models\clientes;
-use App\Models\Empresa;
+use App\Models\Empresas;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 
 class ClientesController extends Controller
 {
+      public function me(Request $request)
+    {
+        return response()->json([
+            "success" => true,
+            "user" => $request->user()
+        ]);
+    }
+
     public function index()
     {
         $clientes = clientes::all();
@@ -38,7 +46,7 @@ class ClientesController extends Controller
         }
 
         $correoExistenteCliente = clientes::where("correo", $request->correo)->exists();
-        $correoExistenteEmpresa = Empresa::where("correo", $request->correo)->exists();
+        $correoExistenteEmpresa = Empresas::where("correo", $request->correo)->exists();
         $correoExistenteAdministradores = Administradores::where("correo", $request->correo)->exists();
         if ($correoExistenteAdministradores || $correoExistenteCliente || $correoExistenteEmpresa) {
             return response()->json([
@@ -180,5 +188,24 @@ class ClientesController extends Controller
             "token" => $token,
             "token_type" => "Bearer"
         ]);
+    }
+
+     public function logout(Request $request)
+    {
+        $user = $request->user();
+
+        if ($user && $user->currentAccessToken()) {
+            $user->currentAccessToken()->delete();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Sesión cerrada correctamente'
+            ]);
+        }
+
+        return response()->json([
+            'success' => false,
+            'message' => 'No hay usuario autenticado o token inválido'
+        ], 401);
     }
 }

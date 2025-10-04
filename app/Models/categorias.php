@@ -11,6 +11,6 @@ class categorias extends Model
     ];
 
     public function categorias(){
-        return $this->hasMany(categorias::class, 'evento_id');
+        return $this->hasMany(categorias::class, 'id');
     }
 }

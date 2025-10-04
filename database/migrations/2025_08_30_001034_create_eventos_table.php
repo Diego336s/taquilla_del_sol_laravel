@@ -20,8 +20,8 @@ return new class extends Migration
             $table->string('lugar');
             $table->integer('capacidad');
             $table->enum('estado', ['activo', 'inactivo']);
-            $table->foreignId('empresa_id')->constrained('empresa', 'id');
-            $table->foreignId('categoria_id')->constrained('categorias', 'id');
+            $table->foreignId('empresa_id')->constrained('empresa', 'empresa_id');
+            $table->foreignId('categoria_id')->constrained('categorias', 'categoria_id');
             $table->timestamps();
         });
     }

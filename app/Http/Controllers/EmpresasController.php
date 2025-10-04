@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Empresa;
+
+use App\Models\Empresas;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Validator;
 
 class EmpresaController extends Controller
 {
@@ -13,7 +15,7 @@ class EmpresaController extends Controller
      */
     public function index()
     {
-        $empresas = Empresa::all();
+        $empresas = Empresas::all();
         return response()->json($empresas, 200);
     }
 //crear una nueva empresa 
@@ -31,7 +33,7 @@ class EmpresaController extends Controller
         ]);
 
         $validated['clave'] = bcrypt($validated['clave']);
-        $empresa = Empresa::create($validated);
+        $empresa = Empresas::create($validated);
 
         $token = $empresa->createToken("auth_token", ["Empresa"])->plainTextToken;
 
@@ -48,13 +50,13 @@ class EmpresaController extends Controller
 
     public function show(string $id)
     {
-        $empresa = Empresa::findOrFail($id);
+        $empresa = Empresas::findOrFail($id);
         return response()->json($empresa, 200);
     }
 
     public function update(Request $request, string $id)
     {
-        $empresa = Empresa::findOrFail($id);
+        $empresa = Empresas::findOrFail($id);
 
         $validated = $request->validate([
             'nombre_empresa'          => 'sometimes|string|max:200',
@@ -79,7 +81,7 @@ class EmpresaController extends Controller
 
     public function cambioClave(Request $request, string $id)
     {
-        $empresa = Empresa::findOrFail($id);
+        $empresa = Empresas::findOrFail($id);
         $validated = $request->validate([
             'clave' => 'required|string|max:6',
         ]);
@@ -93,9 +95,42 @@ class EmpresaController extends Controller
 
     public function destroy(string $id)
     {
-        $empresa = Empresa::findOrFail($id);
+        $empresa = Empresas::findOrFail($id);
         $empresa->delete();
 
         return response()->json(['message' => 'Empresa eliminada correctamente'], 200);
+    }
+
+
+     public function login(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            "correo" => "required|email",
+            "clave" => "required|string|min:6"
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                "success" => false,
+                "message" => $validator->errors()
+            ], 402);
+        }
+
+        $Empresas = Empresas::where("correo", $request->correo)->first();
+
+        if (!$Empresas || !Hash::check($request->clave, $Empresas->clave)) {
+            return response()->json([
+                "success" => false,
+                "message" => "Credenciales incorrectas",
+            ], 401);
+        }
+
+        $token = $Empresas->createToken("auth_token", ["Empresa"])->plainTextToken;
+        return response()->json([
+            "success" => true,
+            "message" => "Inicio de sesion exitoso",
+            "token" => $token,
+            "token_type" => "Bearer"
+        ]);
     }
 }

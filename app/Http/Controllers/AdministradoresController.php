@@ -138,6 +138,25 @@ class AdministradoresController extends Controller
         ]);
     }
 
+     public function logout(Request $request)
+    {
+        $user = $request->user();
+
+        if ($user && $user->currentAccessToken()) {
+            $user->currentAccessToken()->delete();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Sesión cerrada correctamente'
+            ]);
+        }
+
+        return response()->json([
+            'success' => false,
+            'message' => 'No hay usuario autenticado o token inválido'
+        ], 401);
+    }
+
 }
 
 
