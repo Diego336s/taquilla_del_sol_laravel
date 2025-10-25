@@ -9,10 +9,10 @@ use Laravel\Sanctum\HasApiTokens;
 class Asientos extends Model
 {
     use HasApiTokens, Notifiable;
-    protected $fillable =[
-    "fila",
-    "numero",
-    "disponible"
+    protected $fillable = [
+        "ubicacion",
+        "fila",
+        "numero",
+        "disponible"
     ];
 }
-

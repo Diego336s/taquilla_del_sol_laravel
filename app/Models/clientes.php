@@ -2,17 +2,13 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
 class clientes extends Model
 {
-    use HasApiTokens, HasFactory, Notifiable;
-    protected $fillable = ["nombre", "apellido", "documento", "fecha_nacimiento", "telefono", "correo", "clave"];
-    public function eventos()
-    {
-        return $this->hasMany(eventos::class, "cliente_id");
-    }
+    use HasApiTokens, Notifiable;
+    protected $fillable = ["nombre", "apellido", "documento", "fecha_nacimiento", "telefono", "sexo", "correo", "clave"];
 }

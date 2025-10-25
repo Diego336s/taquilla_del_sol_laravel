@@ -12,12 +12,11 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('tickets', function (Blueprint $table) {
-            $table->id("ticket_id");
+            $table->id();
             $table->foreignId('evento_id')->constrained('eventos', 'id');
-            $table->foreignId('cliente_id')->constrained('clientes', 'id');
-            $table->enum("tipo", ["general", "vip", "estudiante"]);
+            $table->foreignId('cliente_id')->constrained('clientes', 'id');           
             $table->decimal("precio", 8,2);
-            $table->enum("estado",["reservado","comprado","cancelado"]);
+            $table->enum("estado",["pendiente","comprado","cancelado"]);
             $table->dateTime("fecha_compra");
             $table->timestamps();
         });

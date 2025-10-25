@@ -12,9 +12,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('pagos', function (Blueprint $table) {
-            $table->id("pago_id");
+            $table->id();
             $table->foreignId("ticket_id")->constrained("tickets","id");
-            $table->enum("metodo_pago",["tarjeta", "paypal", "efectivo", "transferencia"]);
+            $table->enum("metodo_pago",["tarjeta", "efectivo", "transferencia"]);
             $table->decimal("monto", 10,2);
             $table->date("fecha_pago");
             $table->enum("estado", ["pendiente","aprobado","rechazado"]);

@@ -22,7 +22,7 @@ Route::middleware(["auth:sanctum"])->group(function () {
     //Acesso Clientes
     Route::middleware("ability:Cliente")->group(function () {
         Route::get("me/cliente", [ClientesController::class, "me"]);
-        Route::post("logot/cliente", [ClientesController::class, "loguot"]);
+        Route::post("logout/cliente", [ClientesController::class, "logout"]);
     });
 });
 

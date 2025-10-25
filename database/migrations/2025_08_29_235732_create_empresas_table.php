@@ -13,8 +13,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('empresas', function (Blueprint $table) {
-            $table->id("empresa_id");
-            $table->timestamps();
+            $table->id();           
             $table->string('nombre_empresa');
             $table->string('nit')->unique();
             $table->string('representante_legal');
@@ -23,6 +22,7 @@ return new class extends Migration
             $table->string('telefono')->nullable();
             $table->string('correo')->unique();
             $table->string ('clave');
+             $table->timestamps();
 
         });
     }

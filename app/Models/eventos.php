@@ -9,9 +9,9 @@ class Eventos extends Model
     protected $fillable = [
         'titulo',
         'descripcion',
-        'fecha_inicio',
-        'fecha_fin',
-        'lugar',
+        'fecha',
+        "hora_inicio",
+        "hora_final",  
         'capacidad',
         'estado',
         'empresa_id',

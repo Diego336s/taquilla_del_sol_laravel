@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Validator;
 
 class ClientesController extends Controller
 {
-      public function me(Request $request)
+    public function me(Request $request)
     {
         return response()->json([
             "success" => true,
@@ -33,6 +33,7 @@ class ClientesController extends Controller
             "documento" => "required|integer|unique:clientes,documento",
             "fecha_nacimiento" => "required|date",
             "telefono" => "required|integer",
+            "sexo" => "required|in:F,M",
             "correo" => "required|email|unique:clientes,correo",
             "clave" => "required|string|min:6"
         ]);
@@ -61,7 +62,8 @@ class ClientesController extends Controller
             "documento" => $request->documento,
             "fecha_nacimiento" => $request->fecha_nacimiento,
             "telefono" => $request->telefono,
-            "correo" => $request->correo,
+            "sexo" => $request->sexo,
+            "correo" => $request->correo,            
             "clave" => Hash::make($request->clave)
         ]);
         $token = $cliente->createToken("auth_token", ["Cliente"])->plainTextToken;
@@ -103,7 +105,7 @@ class ClientesController extends Controller
             "apellido" => "string",
             "documento" => "integer|unique:clientes,documento",
             "fecha_nacimiento" => "date",
-            "telefono" => "integer"           
+            "telefono" => "integer"
         ]);
 
         if ($validator->fails()) {
@@ -174,6 +176,13 @@ class ClientesController extends Controller
 
         $cliente = clientes::where("correo", $request->correo)->first();
 
+        if (!$cliente) {
+            return response()->json([
+                "success" => false,
+                "message" => "No encontramos tu cuenta",
+            ], 401);
+        }
+
         if (!$cliente || !Hash::check($request->clave, $cliente->clave)) {
             return response()->json([
                 "success" => false,
@@ -190,7 +199,7 @@ class ClientesController extends Controller
         ]);
     }
 
-     public function logout(Request $request)
+    public function logout(Request $request)
     {
         $user = $request->user();
 
