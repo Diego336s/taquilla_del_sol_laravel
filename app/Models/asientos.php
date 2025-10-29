@@ -15,4 +15,8 @@ class Asientos extends Model
         "numero",
         "disponible"
     ];
+     public function reservaAsiento()
+    {
+        return $this->belongsToMany(reservaAsientos::class, 'asiento_id');
+    }
 }

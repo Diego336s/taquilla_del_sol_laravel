@@ -7,10 +7,14 @@ use Illuminate\Database\Eloquent\Model;
 class Pagos extends Model
 {
     protected $fillable = [
-        "ticked_id",
+        "ticket_id",
         "metodo_pago",
         "monto",
         "fecha_pago",
         "estado",
     ];
+    public function ticket()
+    {
+        return $this->hasOne(Ticket::class, "id");
+    }
 }

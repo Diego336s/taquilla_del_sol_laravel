@@ -10,7 +10,7 @@ class categorias extends Model
         'nombre',
     ];
 
-    public function categorias(){
-        return $this->hasMany(categorias::class, 'id');
+    public function eventos(){
+        return $this->hasMany(Eventos::class, 'categoria_id');
     }
 }

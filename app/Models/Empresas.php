@@ -13,7 +13,7 @@ class Empresas extends Model
     use HasFactory;    
     
 
-    protected$fillable = [
+    protected $fillable = [
             'nombre_empresa',
             'nit',
             'representante_legal',
@@ -24,4 +24,7 @@ class Empresas extends Model
             'clave', 
     ];
 
+    public function eventos(){
+     return $this->hasMany(Eventos::class, 'empresa_id');
+    }
 }

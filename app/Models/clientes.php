@@ -11,4 +11,8 @@ class clientes extends Model
 {
     use HasApiTokens, Notifiable;
     protected $fillable = ["nombre", "apellido", "documento", "fecha_nacimiento", "telefono", "sexo", "correo", "clave"];
+    public function ticket()
+    {
+        return $this->hasOne(Ticket::class, "cliente_id");
+    }
 }

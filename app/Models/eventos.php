@@ -11,10 +11,19 @@ class Eventos extends Model
         'descripcion',
         'fecha',
         "hora_inicio",
-        "hora_final",  
+        "hora_final",
         'capacidad',
         'estado',
         'empresa_id',
         'categoria_id',
     ];
+    public function categoria()
+    {
+        return $this->belongsTo(categorias::class, 'id');
+    }
+
+    public function empresa()
+    {
+        return $this->belongsTo(empresas::class, "id");
+    }
 }
