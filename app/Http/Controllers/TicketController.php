@@ -16,10 +16,9 @@ class TicketController extends Controller
     public function store(Request $request){
         $validator = Validator::make($request->all(),[
             'evento_id'    => 'required|integer|exists:eventos,id',
-            'cliente_id'   => 'required|integer|exists:clientes,id',
-            'tipo'         => 'required|in:general,vip,estudiante',
+            'cliente_id'   => 'required|integer|exists:clientes,id',            
             'precio'       => 'required|numeric|min:0',
-            'estado'       => 'required|in:reservado,comprado,cancelado',
+            'estado'       => 'required|in:pendiente,comprado,cancelado',
             'fecha_compra' => 'required|date',
         ]);
 

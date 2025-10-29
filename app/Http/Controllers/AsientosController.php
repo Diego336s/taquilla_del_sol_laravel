@@ -17,6 +17,7 @@ class AsientosController extends Controller
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
+            "ubicacion" =>"required|string",
             "fila" => "required|string",
             "numero" => "required|integer",
             "disponible" => "required|boolean"
@@ -58,6 +59,7 @@ class AsientosController extends Controller
     }
 
     $validator = Validator::make($request->all(), [
+        "ubicacion" =>"required|string",
         "fila" => "sometimes|required|string",
         "numero"=> "sometimes|required|integer",
         "disponible" => "sometimes|required|boolean"

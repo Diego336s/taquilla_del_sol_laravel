@@ -105,6 +105,7 @@ class ClientesController extends Controller
             "apellido" => "string",
             "documento" => "integer|unique:clientes,documento",
             "fecha_nacimiento" => "date",
+            "sexo" => "required|in:F,M",
             "telefono" => "integer"
         ]);
 
