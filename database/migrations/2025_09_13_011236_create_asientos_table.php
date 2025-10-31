@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string("ubicacion");
             $table->string("fila");
             $table->integer("numero");
-            $table->boolean("diponible");
+            $table->boolean("disponible");
             $table->timestamps();
         });
     }
