@@ -73,7 +73,7 @@ class ClientesController extends Controller
             "user" => $cliente,
             "token_access" => $token,
             "token_type" => "Bearer"
-        ]);
+        ],200);
     }
 
     public function show(string $id)
