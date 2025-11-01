@@ -36,6 +36,15 @@ Route::middleware(["auth:sanctum"])->group(function () {
     });
 });
 
+
+Route::middleware(["auth:sanctum"])->group(function () {
+    //Acesso Clientes
+    Route::middleware("ability:Empresa")->group(function () {
+        Route::get("me/cliente", [EmpresasController::class, "me"]);
+        Route::post("logout/empresa", [EmpresasController::class, "logout"]);
+    });
+});
+
 //Clientes
 
 Route::get("listarClientes", [ClientesController::class, "index"]);
