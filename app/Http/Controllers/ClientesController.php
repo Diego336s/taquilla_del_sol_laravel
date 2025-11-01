@@ -42,7 +42,7 @@ class ClientesController extends Controller
         if ($validator_datos->fails()) {
             return response()->json([
                 "success" => false,
-                "error" => $validator_datos->errors()
+                "message" => $validator_datos->errors()
             ], 400);
         }
 
@@ -165,7 +165,7 @@ class ClientesController extends Controller
     {
         $validator = Validator::make($request->all(), [
             "correo" => "required|email",
-            "clave" => "required|string|min:6"
+            "clave" => "required|string"
         ]);
 
         if ($validator->fails()) {
