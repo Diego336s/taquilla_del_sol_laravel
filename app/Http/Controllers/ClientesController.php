@@ -181,14 +181,14 @@ class ClientesController extends Controller
             return response()->json([
                 "success" => false,
                 "message" => "No encontramos tu cuenta",
-            ], 401);
+            ]);
         }
 
         if (!$cliente || !Hash::check($request->clave, $cliente->clave)) {
             return response()->json([
                 "success" => false,
                 "message" => "Credenciales incorrectas",
-            ], 401);
+            ]);
         }
 
         $token = $cliente->createToken("auth_token", ["Cliente"])->plainTextToken;
@@ -216,6 +216,6 @@ class ClientesController extends Controller
         return response()->json([
             'success' => false,
             'message' => 'No hay usuario autenticado o token inválido'
-        ], 401);
+        ]);
     }
 }
