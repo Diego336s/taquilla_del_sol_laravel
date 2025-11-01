@@ -19,10 +19,10 @@ class EmpresasController extends Controller
         $empresas = Empresas::all();
         return response()->json($empresas, 200);
     }
-//crear una nueva empresa 
+    //crear una nueva empresa 
     public function store(Request $request)
     {
-        $validar_datos = Validator::make($request->all(),[
+        $validar_datos = Validator::make($request->all(), [
             'nombre_empresa'          => 'required|string|max:200',
             'nit'                     => 'required|integer|unique:empresas,nit',
             'representante_legal'     => 'required|string|max:200',
@@ -57,7 +57,7 @@ class EmpresasController extends Controller
             "documento_representante" => $request->documento_representante,
             "nombre_contacto" => $request->nombre_contacto,
             "telefono" => $request->telefono,
-            "correo" => $request->correo,            
+            "correo" => $request->correo,
             "clave" => Hash::make($request->clave)
         ]);
 
@@ -69,7 +69,7 @@ class EmpresasController extends Controller
             "user" => $empresa,
             "token_access" => $token,
             "token_type" => "Bearer"
-        ],200);
+        ], 200);
     }
 
     // Mostrar una empresa por ID
@@ -128,7 +128,7 @@ class EmpresasController extends Controller
     }
 
 
-     public function login(Request $request)
+    public function login(Request $request)
     {
         $validator = Validator::make($request->all(), [
             "nit" => "required",
@@ -157,6 +157,25 @@ class EmpresasController extends Controller
             "message" => "Inicio de sesion exitoso",
             "token" => $token,
             "token_type" => "Bearer"
+        ]);
+    }
+
+    public function logout(Request $request)
+    {
+        $user = $request->user();
+
+        if ($user && $user->currentAccessToken()) {
+            $user->currentAccessToken()->delete();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Sesión cerrada correctamente'
+            ]);
+        }
+
+        return response()->json([
+            'success' => false,
+            'message' => 'No hay usuario autenticado o token inválido'
         ]);
     }
 }
