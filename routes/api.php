@@ -3,11 +3,12 @@
 use App\Http\Controllers\AdministradoresController;
 use App\Http\Controllers\CategoriasController;
 use App\Http\Controllers\ClientesController;
-use App\Http\Controllers\EmpresasController;
+
 use App\Http\Controllers\EventosController;
 use App\Http\Controllers\PagosController;
 use App\Http\Controllers\TicketController;
 use App\Http\Controllers\AsientosController;
+use App\Http\Controllers\EmpresasController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
