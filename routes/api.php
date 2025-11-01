@@ -15,8 +15,17 @@ use Illuminate\Support\Facades\Route;
 //     return $request->user();
 // })->middleware('auth:sanctum');
 
-Route::post("login/cliente", [ClientesController::class, "login"]);
+
+
+//** ----- REGISTRAR USUARIO ----- */
+
 Route::post("registrar/cliente", [ClientesController::class, "store"]);
+
+//** ----- LOGIN ----- */
+Route::post("login/empresa", [EmpresaController::class, "login"]);
+Route::post("login/cliente", [ClientesController::class, "login"]);
+
+
 
 Route::middleware(["auth:sanctum"])->group(function () {
     //Acesso Clientes
