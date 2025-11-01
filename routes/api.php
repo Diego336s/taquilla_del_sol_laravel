@@ -3,7 +3,7 @@
 use App\Http\Controllers\AdministradoresController;
 use App\Http\Controllers\CategoriasController;
 use App\Http\Controllers\ClientesController;
-use App\Http\Controllers\EmpresaController;
+use App\Http\Controllers\EmpresasController;
 use App\Http\Controllers\EventosController;
 use App\Http\Controllers\PagosController;
 use App\Http\Controllers\TicketController;
@@ -22,7 +22,7 @@ use Illuminate\Support\Facades\Route;
 Route::post("registrar/cliente", [ClientesController::class, "store"]);
 
 //** ----- LOGIN ----- */
-Route::post("login/empresa", [EmpresaController::class, "login"]);
+Route::post("login/empresa", [EmpresasController::class, "login"]);
 Route::post("login/cliente", [ClientesController::class, "login"]);
 
 
@@ -50,11 +50,11 @@ Route::put("actualizarAdministradores/{id}", [AdministradoresController::class, 
 Route::put("cambiarClave/{id}", [AdministradoresController::class, "cambiarClave"]);
 
 //Empresas
-Route::get("listarEmpresas", [EmpresaController::class, "index"]);
-Route::post("registrarEmpresa", [EmpresaController::class, "store"]);
-Route::put("actualizarEmpresa/{id}", [EmpresaController::class, "update"]);
-Route::delete("eliminarEmpresa/{id}", [EmpresaController::class, "destroy"]);
-Route::put("cambiarClave/{id}", [EmpresaController::class, "cambiarClave"]);
+Route::get("listarEmpresas", [EmpresasController::class, "index"]);
+Route::post("registrarEmpresa", [EmpresasController::class, "store"]);
+Route::put("actualizarEmpresa/{id}", [EmpresasController::class, "update"]);
+Route::delete("eliminarEmpresa/{id}", [EmpresasController::class, "destroy"]);
+Route::put("cambiarClave/{id}", [EmpresasController::class, "cambiarClave"]);
 
 //Categorias
 Route::get("listarCategorias", [CategoriasController::class, "index"]);

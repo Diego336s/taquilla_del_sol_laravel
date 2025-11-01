@@ -2,13 +2,14 @@
 
 namespace App\Http\Controllers;
 
-
+use App\Models\Administradores;
+use App\Models\clientes;
 use App\Models\Empresas;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 
-class EmpresaController extends Controller
+class EmpresasController extends Controller
 {
     /**
      * Listar todas las empresas
@@ -21,19 +22,44 @@ class EmpresaController extends Controller
 //crear una nueva empresa 
     public function store(Request $request)
     {
-        $validated = $request->validate([
+        $validar_datos = Validator::make($request->all(),[
             'nombre_empresa'          => 'required|string|max:200',
-            'nit'                     => 'required|string|max:50',
+            'nit'                     => 'required|integer|unique:empresas,nit',
             'representante_legal'     => 'required|string|max:200',
-            'documento_representante' => 'required|integer|max:10',
+            'documento_representante' => 'required|integer|unique:empresas,documento_representante',
             'nombre_contacto'         => 'nullable|string|max:200',
             'telefono'                => 'nullable|string|max:20',
-            'correo'                  => 'required|email|max:200',
+            'correo'                  => 'required|email|unique:empresas,correo',
             'clave'                   => 'required|string|max:200',
         ]);
 
-        $validated['clave'] = bcrypt($validated['clave']);
-        $empresa = Empresas::create($validated);
+        if ($validar_datos->fails()) {
+            return response()->json([
+                "success" => false,
+                "message" => $validar_datos->errors()
+            ], 400);
+        }
+
+        $correoExistenteCliente = clientes::where("correo", $request->correo)->exists();
+        $correoExistenteEmpresa = Empresas::where("correo", $request->correo)->exists();
+        $correoExistenteAdministradores = Administradores::where("correo", $request->correo)->exists();
+        if ($correoExistenteAdministradores || $correoExistenteCliente || $correoExistenteEmpresa) {
+            return response()->json([
+                "success" => false,
+                "message" => "Correo $request->correo ya se encuetra registrado."
+            ]);
+        }
+
+        $empresa = Empresas::create([
+            "nombre_empresa" => $request->nombre_empresa,
+            "nit" => $request->nit,
+            "representante_legal" => $request->representante_legal,
+            "documento_representante" => $request->documento_representante,
+            "nombre_contacto" => $request->nombre_contacto,
+            "telefono" => $request->telefono,
+            "correo" => $request->correo,            
+            "clave" => Hash::make($request->clave)
+        ]);
 
         $token = $empresa->createToken("auth_token", ["Empresa"])->plainTextToken;
 
@@ -43,7 +69,7 @@ class EmpresaController extends Controller
             "user" => $empresa,
             "token_access" => $token,
             "token_type" => "Bearer"
-        ]);
+        ],200);
     }
 
     // Mostrar una empresa por ID
@@ -105,7 +131,7 @@ class EmpresaController extends Controller
      public function login(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            "correo" => "required|email",
+            "nit" => "required",
             "clave" => "required|string|min:6"
         ]);
 
@@ -116,7 +142,7 @@ class EmpresaController extends Controller
             ], 402);
         }
 
-        $Empresas = Empresas::where("correo", $request->correo)->first();
+        $Empresas = Empresas::where("nit", $request->nit)->first();
 
         if (!$Empresas || !Hash::check($request->clave, $Empresas->clave)) {
             return response()->json([
