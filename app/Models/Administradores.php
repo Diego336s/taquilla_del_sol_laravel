@@ -8,6 +8,6 @@ use Laravel\Sanctum\HasApiTokens;
 
 class Administradores extends Model
 {
-     use HasApiTokens, Notifiable;
-    protected $fillable = ["nombre", "apellido", "documento", "fecha_nacimiento", "telefono","correo", "clave"];
+    use HasApiTokens, Notifiable;
+    protected $fillable = ["nombres", "apellidos", "documento", "fecha_nacimiento", "telefono", "correo", "clave"];
 }

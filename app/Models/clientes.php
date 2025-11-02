@@ -18,7 +18,8 @@ class clientes extends Model
         "telefono",
         "sexo",
         "correo",
-        "clave"
+        "clave",
+        'codigo_recuperacion'
     ];
     public function ticket()
     {

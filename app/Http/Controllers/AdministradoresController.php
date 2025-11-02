@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Administradores;
+use App\Models\clientes;
+use App\Models\Empresas;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
@@ -18,32 +20,52 @@ class AdministradoresController extends Controller
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'nombres' => 'required|string|max:255',
-            'apellidos' => 'required|string|max:255',
-            'documento' => 'required|integer',
+            'nombres' => 'required|string',
+            'apellidos' => 'required|string',
+            'documento' => 'required|integer|unique:administradores,documento',
             'telefono' => 'required|integer|min:10',
-            'correo' => 'required|string|max:255',
+            'correo' => 'required|email|unique:administradores,correo',
             'clave' => 'required|string|min:6',
             'fecha_nacimiento' => 'required|date',
         ]);
 
         if ($validator->fails()) {
-            return response()->json($validator->errors(), 422);
+            return response()->json([
+                "success" => false,
+                "message" => $validator->errors()
+            ], 400);
+        }
+        $correoExistenteCliente = clientes::where("correo", $request->correo)->exists();
+        $correoExistenteEmpresa = Empresas::where("correo", $request->correo)->exists();
+        $correoExistenteAdministradores = Administradores::where("correo", $request->correo)->exists();
+        if ($correoExistenteAdministradores || $correoExistenteCliente || $correoExistenteEmpresa) {
+            return response()->json([
+                "success" => false,
+                "message" => "Correo $request->correo ya se encuetra registrado."
+            ]);
         }
 
-        $validatedData = $validator->validated();
+        $administradores = Administradores::create([
+            "nombres" => $request->nombres,
+            "apellidos" => $request->apellidos,
+            "documento" => $request->documento,
+            "telefono" => $request->telefono,
+            "telefono" => $request->telefono,
+            "correo" => $request->correo,
+            "clave" => Hash::make($request->clave),
+            "fecha_nacimiento" => $request->fecha_nacimiento,
 
-        $validatedData['clave'] = Hash::make($validatedData['clave']);
+        ]);
 
-        $administradores = Administradores::create($validatedData);
-         $token = $administradores->createToken("auth_token", ["Admin"])->plainTextToken;
+
+        $token = $administradores->createToken("auth_token", ["Admin"])->plainTextToken;
         return response()->json([
             "success" => true,
-            "message" => "Administrador $request->nombre registrado correctamente",
+            "message" => "Administrador $request->nombres registrado correctamente",
             "user" => $administradores,
             "token_access" => $token,
             "token_type" => "Bearer"
-        ]); 
+        ],200); 
 
        
     }
@@ -110,29 +132,37 @@ class AdministradoresController extends Controller
      public function login(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            "correo" => "required|email",
-            "clave" => "required|string|min:6"
+            "documento" => "required|integer",
+            "clave" => "required|string"
         ]);
 
         if ($validator->fails()) {
             return response()->json([
                 "success" => false,
                 "error" => $validator->errors()
-            ], 402);
+            ]);
         }
 
-        $admin = Administradores::where("correo", $request->correo)->first();
+        $admin = Administradores::where("documento", $request->documento)->first();
+
+        if (!$admin) {
+            return response()->json([
+                "success" => false,
+                "message" => "No encontramos tu cuenta",
+            ]);
+        }
 
         if (!$admin || !Hash::check($request->clave, $admin->clave)) {
             return response()->json([
                 "success" => false,
-                "error" => "Credenciales incorrectas",
-            ], 401);
+                "error" => "Credenciales Incorrectas",
+            ]);
         }
 
         $token = $admin->createToken("auth_token", ["Admin"])->plainTextToken;
         return response()->json([
             "success" => true,
+            "message" => "Inicio de sesion exitoso",
             "token" => $token,
             "token_type" => "Bearer"
         ]);

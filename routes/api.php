@@ -8,6 +8,7 @@ use App\Http\Controllers\EventosController;
 use App\Http\Controllers\PagosController;
 use App\Http\Controllers\TicketController;
 use App\Http\Controllers\AsientosController;
+use App\Http\Controllers\AuthController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -24,6 +25,10 @@ Route::post("registrar/cliente", [ClientesController::class, "store"]);
 //** ----- LOGIN ----- */
 Route::post("login/empresa", [EmpresasController::class, "login"]);
 Route::post("login/cliente", [ClientesController::class, "login"]);
+Route::post("login/admin", [AdministradoresController::class, "login"]);
+Route::post('codigo/verificacion', [AuthController::class, 'sendResetCode']);
+Route::post('restablecer/clave', [AuthController::class, 'restablecerClave']);
+
 
 
 
@@ -41,6 +46,14 @@ Route::middleware(["auth:sanctum"])->group(function () {
     Route::middleware("ability:Empresa")->group(function () {
         Route::get("me/cliente", [EmpresasController::class, "me"]);
         Route::post("logout/empresa", [EmpresasController::class, "logout"]);
+    });
+});
+
+Route::middleware(["auth:sanctum"])->group(function () {
+    //Acesso Clientes
+    Route::middleware("ability:Admin")->group(function () {
+        Route::get("me/administrador", [AdministradoresController::class, "me"]);
+        Route::post("logout/admin", [AdministradoresController::class, "logout"]);
     });
 });
 

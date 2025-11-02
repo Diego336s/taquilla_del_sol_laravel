@@ -21,6 +21,7 @@ return new class extends Migration
             $table->enum("sexo",["F","M"]);
             $table->string("correo")->unique();
             $table->string("clave");
+            $table->string('codigo_recuperacion', 6)->nullable();
             $table->timestamps();
         });
     }
