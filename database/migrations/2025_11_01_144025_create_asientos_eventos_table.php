@@ -11,11 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('asientos', function (Blueprint $table) {
+        Schema::create('asientos_eventos', function (Blueprint $table) {
             $table->id();
-            $table->string("ubicacion");
-            $table->string("fila");
-            $table->integer("numero");           
+            $table->foreignId("evento_id")->constrained("eventos","id");
+            $table->foreignId("asiento_id")->constrained("asientos","id");
+            $table->boolean("disponible");
             $table->timestamps();
         });
     }
@@ -25,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('asientos');
+        Schema::dropIfExists('asientos_eventos');
     }
 };
