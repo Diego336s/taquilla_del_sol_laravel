@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 01-11-2025 a las 02:05:00
+-- Tiempo de generación: 01-11-2025 a las 14:23:55
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -252,36 +252,6 @@ INSERT INTO `asientos` (`id`, `ubicacion`, `fila`, `numero`, `disponible`, `crea
 (208, 'Palco Derecho primer piso', 'P1', 18, 1, '2025-11-01 00:59:32', '2025-11-01 00:59:32'),
 (209, 'Palco Derecho primer piso', 'P1', 19, 1, '2025-11-01 00:59:32', '2025-11-01 00:59:32'),
 (210, 'Palco Derecho primer piso', 'P1', 20, 1, '2025-11-01 00:59:32', '2025-11-01 00:59:32'),
-(211, 'Palco Trasero primer piso', 'P1', 1, 1, '2025-11-01 01:00:06', '2025-11-01 01:00:06'),
-(212, 'Palco Trasero primer piso', 'P1', 2, 1, '2025-11-01 01:00:06', '2025-11-01 01:00:06'),
-(213, 'Palco Trasero primer piso', 'P1', 3, 1, '2025-11-01 01:00:06', '2025-11-01 01:00:06'),
-(214, 'Palco Trasero primer piso', 'P1', 4, 1, '2025-11-01 01:00:06', '2025-11-01 01:00:06'),
-(215, 'Palco Trasero primer piso', 'P1', 5, 1, '2025-11-01 01:00:06', '2025-11-01 01:00:06'),
-(216, 'Palco Trasero primer piso', 'P1', 6, 1, '2025-11-01 01:00:06', '2025-11-01 01:00:06'),
-(217, 'Palco Trasero primer piso', 'P1', 7, 1, '2025-11-01 01:00:06', '2025-11-01 01:00:06'),
-(218, 'Palco Trasero primer piso', 'P1', 8, 1, '2025-11-01 01:00:06', '2025-11-01 01:00:06'),
-(219, 'Palco Trasero primer piso', 'P1', 9, 1, '2025-11-01 01:00:06', '2025-11-01 01:00:06'),
-(220, 'Palco Trasero primer piso', 'P1', 10, 1, '2025-11-01 01:00:06', '2025-11-01 01:00:06'),
-(221, 'Palco Trasero primer piso', 'P1', 11, 1, '2025-11-01 01:00:06', '2025-11-01 01:00:06'),
-(222, 'Palco Trasero primer piso', 'P1', 12, 1, '2025-11-01 01:00:06', '2025-11-01 01:00:06'),
-(223, 'Palco Trasero primer piso', 'P1', 13, 1, '2025-11-01 01:00:06', '2025-11-01 01:00:06'),
-(224, 'Palco Trasero primer piso', 'P1', 14, 1, '2025-11-01 01:00:06', '2025-11-01 01:00:06'),
-(225, 'Palco Trasero primer piso', 'P1', 15, 1, '2025-11-01 01:00:06', '2025-11-01 01:00:06'),
-(226, 'Palco Trasero primer piso', 'P1', 16, 1, '2025-11-01 01:00:06', '2025-11-01 01:00:06'),
-(227, 'Palco Trasero primer piso', 'P1', 17, 1, '2025-11-01 01:00:06', '2025-11-01 01:00:06'),
-(228, 'Palco Trasero primer piso', 'P1', 18, 1, '2025-11-01 01:00:06', '2025-11-01 01:00:06'),
-(229, 'Palco Trasero primer piso', 'P1', 19, 1, '2025-11-01 01:00:06', '2025-11-01 01:00:06'),
-(230, 'Palco Trasero primer piso', 'P1', 20, 1, '2025-11-01 01:00:06', '2025-11-01 01:00:06'),
-(231, 'Palco Trasero primer piso', 'P1', 1, 1, '2025-11-01 01:00:32', '2025-11-01 01:00:32'),
-(232, 'Palco Trasero primer piso', 'P1', 2, 1, '2025-11-01 01:00:32', '2025-11-01 01:00:32'),
-(233, 'Palco Trasero primer piso', 'P1', 3, 1, '2025-11-01 01:00:32', '2025-11-01 01:00:32'),
-(234, 'Palco Trasero primer piso', 'P1', 4, 1, '2025-11-01 01:00:32', '2025-11-01 01:00:32'),
-(235, 'Palco Trasero primer piso', 'P1', 5, 1, '2025-11-01 01:00:32', '2025-11-01 01:00:32'),
-(236, 'Palco Trasero primer piso', 'P1', 6, 1, '2025-11-01 01:00:32', '2025-11-01 01:00:32'),
-(237, 'Palco Trasero primer piso', 'P1', 7, 1, '2025-11-01 01:00:32', '2025-11-01 01:00:32'),
-(238, 'Palco Trasero primer piso', 'P1', 8, 1, '2025-11-01 01:00:32', '2025-11-01 01:00:32'),
-(239, 'Palco Trasero primer piso', 'P1', 9, 1, '2025-11-01 01:00:32', '2025-11-01 01:00:32'),
-(240, 'Palco Trasero primer piso', 'P1', 10, 1, '2025-11-01 01:00:32', '2025-11-01 01:00:32'),
 (241, 'Palco Izquierdo segundo piso', 'P2', 1, 1, '2025-11-01 01:01:02', '2025-11-01 01:01:02'),
 (242, 'Palco Izquierdo segundo piso', 'P2', 2, 1, '2025-11-01 01:01:02', '2025-11-01 01:01:02'),
 (243, 'Palco Izquierdo segundo piso', 'P2', 3, 1, '2025-11-01 01:01:02', '2025-11-01 01:01:02'),
@@ -331,7 +301,17 @@ INSERT INTO `asientos` (`id`, `ubicacion`, `fila`, `numero`, `disponible`, `crea
 (287, 'Palco Trasero segundo piso', 'P2', 7, 1, '2025-11-01 01:01:46', '2025-11-01 01:01:46'),
 (288, 'Palco Trasero segundo piso', 'P2', 8, 1, '2025-11-01 01:01:46', '2025-11-01 01:01:46'),
 (289, 'Palco Trasero segundo piso', 'P2', 9, 1, '2025-11-01 01:01:46', '2025-11-01 01:01:46'),
-(290, 'Palco Trasero segundo piso', 'P2', 10, 1, '2025-11-01 01:01:46', '2025-11-01 01:01:46');
+(290, 'Palco Trasero segundo piso', 'P2', 10, 1, '2025-11-01 01:01:46', '2025-11-01 01:01:46'),
+(301, 'Palco Trasero primer piso', 'P1', 1, 1, '2025-11-01 13:15:49', '2025-11-01 13:15:49'),
+(302, 'Palco Trasero primer piso', 'P1', 2, 1, '2025-11-01 13:15:49', '2025-11-01 13:15:49'),
+(303, 'Palco Trasero primer piso', 'P1', 3, 1, '2025-11-01 13:15:49', '2025-11-01 13:15:49'),
+(304, 'Palco Trasero primer piso', 'P1', 4, 1, '2025-11-01 13:15:49', '2025-11-01 13:15:49'),
+(305, 'Palco Trasero primer piso', 'P1', 5, 1, '2025-11-01 13:15:49', '2025-11-01 13:15:49'),
+(306, 'Palco Trasero primer piso', 'P1', 6, 1, '2025-11-01 13:15:49', '2025-11-01 13:15:49'),
+(307, 'Palco Trasero primer piso', 'P1', 7, 1, '2025-11-01 13:15:49', '2025-11-01 13:15:49'),
+(308, 'Palco Trasero primer piso', 'P1', 8, 1, '2025-11-01 13:15:49', '2025-11-01 13:15:49'),
+(309, 'Palco Trasero primer piso', 'P1', 9, 1, '2025-11-01 13:15:49', '2025-11-01 13:15:49'),
+(310, 'Palco Trasero primer piso', 'P1', 10, 1, '2025-11-01 13:15:49', '2025-11-01 13:15:49');
 
 --
 -- Índices para tablas volcadas
@@ -351,7 +331,7 @@ ALTER TABLE `asientos`
 -- AUTO_INCREMENT de la tabla `asientos`
 --
 ALTER TABLE `asientos`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=291;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=311;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

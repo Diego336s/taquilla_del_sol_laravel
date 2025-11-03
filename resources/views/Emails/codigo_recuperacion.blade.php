@@ -9,7 +9,7 @@
         <h2 style="color: #f97316;">Hola {{ $nombre }} 👋</h2>
         <p>Has solicitado restablecer tu contraseña. Usa el siguiente código para continuar:</p>
         <h1 style="text-align:center; letter-spacing: 5px; color:#f97316;">{{ $codigo }}</h1>
-        <p>Este código expira en 10 minutos.</p>
+        <p>En caso de cualquier falla, comunicate con nosotros.</p>
         <p>Si no solicitaste este cambio, ignora este mensaje.</p>
         <br>
         <p style="color:#6c757d;">© {{ date('Y') }} Taquillería del Sol | Todos los derechos reservados.</p>
