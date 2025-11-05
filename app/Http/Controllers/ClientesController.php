@@ -11,11 +11,22 @@ use Illuminate\Support\Facades\Validator;
 
 class ClientesController extends Controller
 {
+
+
     public function me(Request $request)
     {
+        $cliente = $request->user();
+
+        if (!$cliente) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No se encontró el cliente autenticado.'
+            ], 404);
+        }
+
         return response()->json([
-            "success" => true,
-            "user" => $request->user()
+            'success' => true,
+            'cliente' => $cliente
         ]);
     }
 
@@ -63,7 +74,7 @@ class ClientesController extends Controller
             "fecha_nacimiento" => $request->fecha_nacimiento,
             "telefono" => $request->telefono,
             "sexo" => $request->sexo,
-            "correo" => $request->correo,            
+            "correo" => $request->correo,
             "clave" => Hash::make($request->clave)
         ]);
         $token = $cliente->createToken("auth_token", ["Cliente"])->plainTextToken;
@@ -73,7 +84,7 @@ class ClientesController extends Controller
             "user" => $cliente,
             "token_access" => $token,
             "token_type" => "Bearer"
-        ],200);
+        ], 200);
     }
 
     public function show(string $id)
@@ -192,11 +203,13 @@ class ClientesController extends Controller
         }
 
         $token = $cliente->createToken("auth_token", ["Cliente"])->plainTextToken;
+
         return response()->json([
             "success" => true,
-            "message" => "Inicio de sesion exitoso",
+            "message" => "Inicio de sesión exitoso",
             "token" => $token,
-            "token_type" => "Bearer"
+            "token_type" => "Bearer",
+            "cliente" => $cliente
         ]);
     }
 

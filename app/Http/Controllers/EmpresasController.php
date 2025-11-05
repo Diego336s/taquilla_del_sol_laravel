@@ -156,7 +156,8 @@ class EmpresasController extends Controller
             "success" => true,
             "message" => "Inicio de sesion exitoso",
             "token" => $token,
-            "token_type" => "Bearer"
+            "token_type" => "Bearer",
+            "empresa"=> $Empresas
         ]);
     }
 
