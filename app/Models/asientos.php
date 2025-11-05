@@ -12,8 +12,7 @@ class Asientos extends Model
     protected $fillable = [
         "ubicacion",
         "fila",
-        "numero",
-        "disponible"
+        "numero"
     ];
      public function reservaAsiento()
     {

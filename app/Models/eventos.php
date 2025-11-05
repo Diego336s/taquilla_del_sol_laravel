@@ -11,7 +11,7 @@ class Eventos extends Model
         'descripcion',
         'fecha',
         "hora_inicio",
-        "hora_final",        
+        "hora_final",
         'estado',
         'empresa_id',
         'categoria_id',
@@ -21,6 +21,11 @@ class Eventos extends Model
         return $this->belongsTo(categorias::class, 'id');
     }
 
+    public function asientosEventos()
+    {
+        return $this->hasMany(asientosEventos::class, 'id');
+    }
+    
     public function empresa()
     {
         return $this->belongsTo(empresas::class, "id");

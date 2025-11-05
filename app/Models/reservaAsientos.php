@@ -8,13 +8,13 @@ class reservaAsientos extends Model
 {
     protected $fillable = [
         "ticket_id",
-        "asiento_id"
+        "asiento_evento_id"
     ];
 
-    public function ticketS(){
+    public function tickets(){
         return $this->belongsToMany(Ticket::class, 'id');
     }
-    public function asientos(){
-        return $this->belongsToMany(Asientos::class, 'id');
+    public function asientosEventos(){
+        return $this->belongsToMany(asientosEventos::class, 'id');
     }
 }

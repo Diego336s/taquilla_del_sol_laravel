@@ -9,6 +9,7 @@ use App\Http\Controllers\PagosController;
 use App\Http\Controllers\TicketController;
 use App\Http\Controllers\AsientosController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\CodigoVerificacionController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -26,7 +27,7 @@ Route::post("registrar/cliente", [ClientesController::class, "store"]);
 Route::post("login/empresa", [EmpresasController::class, "login"]);
 Route::post("login/cliente", [ClientesController::class, "login"]);
 Route::post("login/admin", [AdministradoresController::class, "login"]);
-Route::post('codigo/verificacion', [AuthController::class, 'sendResetCode']);
+Route::post('codigo/verificacion', [CodigoVerificacionController::class, 'enviarCodigo']);
 Route::post('restablecer/clave', [AuthController::class, 'restablecerClave']);
 
 
