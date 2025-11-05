@@ -231,4 +231,40 @@ class ClientesController extends Controller
             'message' => 'No hay usuario autenticado o token inválido'
         ]);
     }
+
+
+    public function olvideMiClave(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            "correo" => "required|string|email",
+            "clave"  => "required|string|min:6"
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                "success" => false,
+                "message" => $validator->errors()
+            ], 400);
+        }
+
+        // Buscar cliente por correo
+        $clientes = clientes::where("correo", $request->correo)->first();
+
+        if (!$clientes) {
+            return response()->json([
+                "success" => false,
+                "message" => "No se encontró un cliente con ese correo"
+            ], 404);
+        }
+
+        // Actualizar clave
+        $clientes->update([
+            "clave" => Hash::make($request->clave)
+        ]);
+
+        return response()->json([
+            "success" => true,
+            "message" => "Cambio de clave exitoso"
+        ], 200);
+    }
 }

@@ -27,9 +27,9 @@ Route::post("registrar/cliente", [ClientesController::class, "store"]);
 Route::post("login/empresa", [EmpresasController::class, "login"]);
 Route::post("login/cliente", [ClientesController::class, "login"]);
 Route::post("login/admin", [AdministradoresController::class, "login"]);
-Route::post('codigo/verificacion', [CodigoVerificacionController::class, 'enviarCodigo']);
-Route::post('restablecer/clave', [AuthController::class, 'restablecerClave']);
-
+Route::post('envio/codigo/verificacion', [CodigoVerificacionController::class, 'enviarCodigo']);
+Route::post('verificar/codigo', [CodigoVerificacionController::class, 'verificarCodigo']);
+Route::post("olvide/clave/cliente", [ClientesController::class, "olvideMiClave"]);
 
 
 
