@@ -30,6 +30,9 @@ Route::post("login/admin", [AdministradoresController::class, "login"]);
 Route::post('envio/codigo/verificacion', [CodigoVerificacionController::class, 'enviarCodigo']);
 Route::post('verificar/codigo', [CodigoVerificacionController::class, 'verificarCodigo']);
 Route::post("olvide/clave/cliente", [ClientesController::class, "olvideMiClave"]);
+Route::post("olvide/clave/empresa", [EmpresasController::class, "olvideMiClaveEmpresa"]);
+Route::post("olvide/clave/admin", [AdministradoresController::class, "olvideMiClaveAdmin"]);
+
 
 
 
