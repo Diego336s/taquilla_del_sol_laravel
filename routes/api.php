@@ -41,6 +41,7 @@ Route::middleware(["auth:sanctum"])->group(function () {
     Route::middleware("abilities:Cliente")->group(function () {
         Route::get("me/cliente", [ClientesController::class, "me"]);
         Route::post("logout/cliente", [ClientesController::class, "logout"]);
+        Route::put("actualizarCliente/{id}", [ClientesController::class, "update"]);
     });
 });
 
@@ -65,7 +66,6 @@ Route::middleware(["auth:sanctum"])->group(function () {
 
 Route::get("listarClientes", [ClientesController::class, "index"]);
 
-Route::put("actualizarCliente/{id}", [ClientesController::class, "update"]);
 Route::delete("eliminarCliente/{id}", [ClientesController::class, "destroy"]);
 Route::put("cambiarClave/{id}", [ClientesController::class, "cambiarClave"]);
 
