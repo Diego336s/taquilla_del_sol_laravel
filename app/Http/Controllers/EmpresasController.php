@@ -179,4 +179,41 @@ class EmpresasController extends Controller
             'message' => 'No hay usuario autenticado o token inválido'
         ]);
     }
+
+    //Restablecer clave empresa
+
+        public function olvideMiClaveEmpresa(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            "correo" => "required|string|email",
+            "clave"  => "required|string|min:6"
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                "success" => false,
+                "message" => $validator->errors()
+            ], 400);
+        }
+
+        // Buscar empresa por correo
+        $Empresas = Empresas::where("correo", $request->correo)->first();
+
+        if (!$Empresas) {
+            return response()->json([
+                "success" => false,
+                "message" => "No se encontró un cliente con ese correo"
+            ], 404);
+        }
+
+        // Actualizar clave
+        $Empresas->update([
+            "clave" => Hash::make($request->clave)
+        ]);
+
+        return response()->json([
+            "success" => true,
+            "message" => "Cambio de clave exitoso"
+        ], 200);
+    }
 }

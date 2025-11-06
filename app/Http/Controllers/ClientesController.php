@@ -223,7 +223,7 @@ class ClientesController extends Controller
         ]);
     }
 
-
+    //Restablecer clave cliente
     public function olvideMiClave(Request $request)
     {
         $validator = Validator::make($request->all(), [

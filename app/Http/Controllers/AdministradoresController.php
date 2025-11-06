@@ -65,9 +65,7 @@ class AdministradoresController extends Controller
             "user" => $administradores,
             "token_access" => $token,
             "token_type" => "Bearer"
-        ],200); 
-
-       
+        ], 200);
     }
 
     public function show(string $id)
@@ -86,7 +84,7 @@ class AdministradoresController extends Controller
             return response()->json(['message' => 'Administrador no encontrado'], 404);
         }
 
-        $validator = Validator::make($request->all(),[
+        $validator = Validator::make($request->all(), [
             'nombres' => 'sometimes|required|string|max:255',
             'apellidos' => 'sometimes|required|string|max:255',
             'documento' => 'sometimes|required|integer',
@@ -104,7 +102,8 @@ class AdministradoresController extends Controller
         return response()->json($administradores);
     }
 
-    public function cambiarClave(Request $request, string $id){
+    public function cambiarClave(Request $request, string $id)
+    {
         $administradores = Administradores::find($id);
         if (!$administradores) {
             return response()->json(['message' => 'Administrador no encontrado'], 404);
@@ -119,7 +118,8 @@ class AdministradoresController extends Controller
         return response()->json($administradores);
     }
 
-    public function destroy(string $id){
+    public function destroy(string $id)
+    {
         $administradores = Administradores::find($id);
         if (!$administradores) {
             return response()->json(['message' => 'Administrador no encontrado']);
@@ -129,7 +129,7 @@ class AdministradoresController extends Controller
         return response()->json(['message' => 'Administrador eliminado correctamente']);
     }
 
-     public function login(Request $request)
+    public function login(Request $request)
     {
         $validator = Validator::make($request->all(), [
             "documento" => "required|integer",
@@ -169,7 +169,7 @@ class AdministradoresController extends Controller
         ]);
     }
 
-     public function logout(Request $request)
+    public function logout(Request $request)
     {
         $user = $request->user();
 
@@ -188,6 +188,39 @@ class AdministradoresController extends Controller
         ], 401);
     }
 
+    //Restablecer clave administrador
+    public function olvideMiClaveAdmin(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            "correo" => "required|string|email",
+            "clave"  => "required|string|min:6"
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                "success" => false,
+                "message" => $validator->errors()
+            ], 400);
+        }
+
+        // Buscar admin por correo
+        $admin = Administradores::where("correo", $request->correo)->first();
+
+        if (!$admin) {
+            return response()->json([
+                "success" => false,
+                "message" => "No se encontró un cliente con ese correo"
+            ], 404);
+        }
+
+        // Actualizar clave
+        $admin->update([
+            "clave" => Hash::make($request->clave)
+        ]);
+
+        return response()->json([
+            "success" => true,
+            "message" => "Cambio de clave exitoso"
+        ], 200);
+    }
 }
-
-
