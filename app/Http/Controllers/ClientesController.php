@@ -119,7 +119,11 @@ class ClientesController extends Controller
         };
 
         $cliente = clientes::update($validator->validated());
-        return response()->json($cliente, 200);
+        return response()->json([
+            "success" => true,
+            "message" => "Cliente $request->nombre $request->apellido actualizado correctamente",
+            $cliente
+        ], 200);
     }
 
     public function destroy(string $id)
