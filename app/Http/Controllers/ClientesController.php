@@ -90,6 +90,45 @@ class ClientesController extends Controller
         return response()->json($cliente, 200);
     }
 
+    public function updateCliente(Request $request, string $id)
+{
+    $cliente = clientes::find($id);
+
+    if (!$cliente) {
+        return response()->json([
+            "success" => false,
+            "message" => "Cliente no encontrado"
+        ], 404);
+    }
+
+    $validator = Validator::make($request->all(), [
+        "nombre" => "sometimes|string|max:100",
+        "apellido" => "sometimes|string|max:100",
+        "documento" => "sometimes|integer|unique:clientes,documento," . $cliente->id,
+        "fecha_nacimiento" => "sometimes|date",
+        "sexo" => "sometimes|in:F,M",
+        "telefono" => "sometimes|string|max:15"
+    ]);
+
+    if ($validator->fails()) {
+        return response()->json([
+            "success" => false,
+            "message" => "Errores de validación",
+            "errors" => $validator->errors()
+        ], 400);
+    }
+
+    // ✅ Actualizar solo los campos validados
+    $cliente->update($validator->validated());
+
+    return response()->json([
+        "success" => true,
+        "message" => "Perfil actualizado correctamente",
+        "cliente" => $cliente
+    ], 200);
+}
+
+
     public function update(Request $request, string $id)
     {
 
