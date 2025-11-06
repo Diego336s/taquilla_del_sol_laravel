@@ -35,7 +35,7 @@ Route::post("olvide/clave/cliente", [ClientesController::class, "olvideMiClave"]
 
 Route::middleware(["auth:sanctum"])->group(function () {
     //Acesso Clientes
-    Route::middleware("ability:Cliente")->group(function () {
+    Route::middleware("abilities:Cliente")->group(function () {
         Route::get("me/cliente", [ClientesController::class, "me"]);
         Route::post("logout/cliente", [ClientesController::class, "logout"]);
     });
@@ -44,15 +44,15 @@ Route::middleware(["auth:sanctum"])->group(function () {
 
 Route::middleware(["auth:sanctum"])->group(function () {
     //Acesso Clientes
-    Route::middleware("ability:Empresa")->group(function () {
-        Route::get("me/cliente", [EmpresasController::class, "me"]);
+    Route::middleware("abilities:Empresa")->group(function () {
+        Route::get("me/Empresa", [EmpresasController::class, "me"]);
         Route::post("logout/empresa", [EmpresasController::class, "logout"]);
     });
 });
 
 Route::middleware(["auth:sanctum"])->group(function () {
     //Acesso Clientes
-    Route::middleware("ability:Admin")->group(function () {
+    Route::middleware("abilities:Admin")->group(function () {
         Route::get("me/administrador", [AdministradoresController::class, "me"]);
         Route::post("logout/admin", [AdministradoresController::class, "logout"]);
     });

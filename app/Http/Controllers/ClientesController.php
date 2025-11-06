@@ -15,18 +15,9 @@ class ClientesController extends Controller
 
     public function me(Request $request)
     {
-        $cliente = $request->user();
-
-        if (!$cliente) {
-            return response()->json([
-                'success' => false,
-                'message' => 'No se encontró el cliente autenticado.'
-            ], 404);
-        }
-
-        return response()->json([
-            'success' => true,
-            'cliente' => $cliente
+         return response()->json([
+            "success" => true,
+            "user" => $request->user()
         ]);
     }
 
@@ -112,12 +103,12 @@ class ClientesController extends Controller
 
 
         $validator = Validator::make($request->all(), [
-            "nombre" => "string",
-            "apellido" => "string",
-            "documento" => "integer|unique:clientes,documento",
-            "fecha_nacimiento" => "date",
-            "sexo" => "required|in:F,M",
-            "telefono" => "integer"
+            "nombre" => "sometimes|string",
+            "apellido" => "sometimes|string",
+            "documento" => "sometimes|integer|unique:clientes,documento",
+            "fecha_nacimiento" => "sometimes|date",
+            "sexo" => "sometimes|in:F,M",
+            "telefono" => "sometimes|integer"
         ]);
 
         if ($validator->fails()) {
