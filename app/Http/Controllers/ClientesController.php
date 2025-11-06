@@ -123,47 +123,11 @@ class ClientesController extends Controller
 
     return response()->json([
         "success" => true,
-        "message" => "Perfil actualizado correctamente",
+        "message" => "Perfil de $request->nombre $request->apellido actualizado correctamente",
         "cliente" => $cliente
     ], 200);
 }
 
-
-    public function update(Request $request, string $id)
-    {
-
-        $cliente = clientes::find($id);
-        if (!$cliente) {
-            return response()->json([
-                "success" => false,
-                "message" => "Cliente no encontrado"
-            ], 404);
-        }
-
-
-        $validator = Validator::make($request->all(), [
-            "nombre" => "sometimes|string",
-            "apellido" => "sometimes|string",
-            "documento" => "sometimes|integer|unique:clientes,documento",
-            "fecha_nacimiento" => "sometimes|date",
-            "sexo" => "sometimes|in:F,M",
-            "telefono" => "sometimes|integer"
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json([
-                "success" => false,
-                "error" => $validator->errors()
-            ], 400);
-        };
-
-        $cliente = clientes::update($validator->validated());
-        return response()->json([
-            "success" => true,
-            "message" => "Cliente $request->nombre $request->apellido actualizado correctamente",
-            $cliente
-        ], 200);
-    }
 
     public function destroy(string $id)
     {
