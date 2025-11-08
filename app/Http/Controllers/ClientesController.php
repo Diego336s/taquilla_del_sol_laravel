@@ -162,18 +162,28 @@ class ClientesController extends Controller
         if ($validator_clave->fails()) {
             return response()->json([
                 "success" => false,
+                "message" => "Error de validaciones en el servidor",
                 "error" => $validator_clave->errors()
             ], 400);
         };
 
-        $cliente = clientes::update($validator_clave->validated());
+          if (Hash::check($request->clave, $cliente->clave)) {
+            return response()->json([
+                "success" => false,
+                "message" => "La contraseña debe ser diferente a la actual.",
+            ]);
+        }
+
+        $cliente->update([
+            "clave" => Hash::make($request->clave)
+        ]);
          $user = $request->user();
         if ($user && $user->currentAccessToken()) {
             $user->currentAccessToken()->delete();
         }
         return response()->json([
             "success" => true,
-            "Clave cambiada exitosamente. Inicia sesion nuevamente.",
+            "message" => "Clave cambiada exitosamente. Inicia sesion nuevamente.",
             $cliente
         ], 200);
     }
