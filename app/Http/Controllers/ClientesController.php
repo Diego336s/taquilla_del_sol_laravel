@@ -15,7 +15,7 @@ class ClientesController extends Controller
 
     public function me(Request $request)
     {
-         return response()->json([
+        return response()->json([
             "success" => true,
             "user" => $request->user()
         ]);
@@ -91,42 +91,42 @@ class ClientesController extends Controller
     }
 
     public function updateCliente(Request $request, string $id)
-{
-    $cliente = clientes::find($id);
+    {
+        $cliente = clientes::find($id);
 
-    if (!$cliente) {
+        if (!$cliente) {
+            return response()->json([
+                "success" => false,
+                "message" => "Cliente no encontrado"
+            ], 404);
+        }
+
+        $validator = Validator::make($request->all(), [
+            "nombre" => "sometimes|string|max:100",
+            "apellido" => "sometimes|string|max:100",
+            "documento" => "sometimes|integer|unique:clientes,documento," . $cliente->id,
+            "fecha_nacimiento" => "sometimes|date",
+            "sexo" => "sometimes|in:F,M",
+            "telefono" => "sometimes|string|max:15"
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                "success" => false,
+                "message" => "Errores de validación",
+                "errors" => $validator->errors()
+            ], 400);
+        }
+
+        // ✅ Actualizar solo los campos validados
+        $cliente->update($validator->validated());
+
         return response()->json([
-            "success" => false,
-            "message" => "Cliente no encontrado"
-        ], 404);
+            "success" => true,
+            "message" => "Perfil de $request->nombre $request->apellido actualizado correctamente",
+            "cliente" => $cliente
+        ], 200);
     }
-
-    $validator = Validator::make($request->all(), [
-        "nombre" => "sometimes|string|max:100",
-        "apellido" => "sometimes|string|max:100",
-        "documento" => "sometimes|integer|unique:clientes,documento," . $cliente->id,
-        "fecha_nacimiento" => "sometimes|date",
-        "sexo" => "sometimes|in:F,M",
-        "telefono" => "sometimes|string|max:15"
-    ]);
-
-    if ($validator->fails()) {
-        return response()->json([
-            "success" => false,
-            "message" => "Errores de validación",
-            "errors" => $validator->errors()
-        ], 400);
-    }
-
-    // ✅ Actualizar solo los campos validados
-    $cliente->update($validator->validated());
-
-    return response()->json([
-        "success" => true,
-        "message" => "Perfil de $request->nombre $request->apellido actualizado correctamente",
-        "cliente" => $cliente
-    ], 200);
-}
 
 
     public function destroy(string $id)
@@ -167,7 +167,15 @@ class ClientesController extends Controller
         };
 
         $cliente = clientes::update($validator_clave->validated());
-        return response()->json($cliente, 200);
+         $user = $request->user();
+        if ($user && $user->currentAccessToken()) {
+            $user->currentAccessToken()->delete();
+        }
+        return response()->json([
+            "success" => true,
+            "Clave cambiada exitosamente. Inicia sesion nuevamente.",
+            $cliente
+        ], 200);
     }
 
     public function login(Request $request)
@@ -263,6 +271,53 @@ class ClientesController extends Controller
         return response()->json([
             "success" => true,
             "message" => "Cambio de clave exitoso"
+        ], 200);
+    }
+
+
+    public function cambiarCorreo(Request $request, string $id)
+    {
+        $cliente = clientes::find($id);
+        if (!$cliente) {
+            return response()->json(["menssge" => "Cliente no encontrado"]);
+        }
+
+        $validator = Validator::make($request->all(), [
+            "correo" => "string|email"
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                "success" => false,
+                "message" => $validator->errors()
+            ], 400);
+        }
+
+        $correoExistenteCliente = clientes::where("correo", $request->correo)->exists();
+        $correoExistenteAdmin = Administradores::where("correo", $request->correo)->exists();
+        $correoExistenteEmpresa = Empresas::where("correo", $request->correo)->exists();
+
+        if ($correoExistenteAdmin || $correoExistenteEmpresa || $correoExistenteCliente) {
+            return response()->json([
+                "success" => false,
+                "message" => "El correo $request->correo ya se encuentra registrado"
+            ]);
+        }
+
+
+
+
+
+
+        $cliente->update($validator->validated());
+        $user = $request->user();
+        if ($user && $user->currentAccessToken()) {
+            $user->currentAccessToken()->delete();
+        }
+        return response()->json([
+            "success" => true,
+            "message" => "Cambio del correo exitoso. Inicia sesion nuevamente."
+
         ], 200);
     }
 }
