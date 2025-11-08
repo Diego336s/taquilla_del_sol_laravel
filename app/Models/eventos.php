@@ -15,6 +15,7 @@ class Eventos extends Model
         'estado',
         'empresa_id',
         'categoria_id',
+        'imagen',
     ];
     public function categoria()
     {

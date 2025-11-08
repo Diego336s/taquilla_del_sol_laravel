@@ -16,11 +16,12 @@ return new class extends Migration
             $table->string('titulo');
             $table->text('descripcion')->nullable();
             $table->date('fecha');
-            $table->time("hora_inicio");
-            $table->time("hora_final");                            
+            $table->string("hora_inicio", 8); 
+            $table->string("hora_final", 8);                           
             $table->enum('estado', ['activo',"pendiente",'cancelado',"finalizado"]);
             $table->foreignId('empresa_id')->constrained('empresas', 'id');
             $table->foreignId('categoria_id')->constrained('categorias', 'id');
+            $table->string("imagen")->nullable();
             $table->timestamps();
         });
     }
