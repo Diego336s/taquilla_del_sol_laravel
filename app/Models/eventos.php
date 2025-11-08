@@ -3,9 +3,12 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 
 class Eventos extends Model
 {
+
+
     protected $fillable = [
         'titulo',
         'descripcion',
@@ -30,5 +33,15 @@ class Eventos extends Model
     public function empresa()
     {
         return $this->belongsTo(empresas::class, "id");
+    }
+
+    protected function imagen(): Attribute
+    {
+        return Attribute::make(
+            // El valor ($value) es la ruta guardada en la DB (ej: /storage/eventos/titanic/...)
+            get: fn (string|null $value) => $value ? url($value) : null,
+
+            // En el terminal para acceder a la ruta public/storage --- php artisan storage:link ----
+        );
     }
 }

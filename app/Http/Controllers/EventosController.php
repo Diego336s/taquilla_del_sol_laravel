@@ -23,7 +23,7 @@ class EventosController extends Controller
             'fecha'         => 'required|date',
             'hora_inicio'   => 'required|string|size:8',
             'hora_final'    => 'required|string|size:8',
-            'imagen'        => 'nullable|image|max:2048',
+            'imagen'        => 'nullable|image',
             'estado'        => 'required|in:activo,pendiente,cancelado,finalizado',
             'empresa_id'    => 'required|integer|exists:empresas,id',
             'categoria_id'  => 'required|integer|exists:categorias,id',
