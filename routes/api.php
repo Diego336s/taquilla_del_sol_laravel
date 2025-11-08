@@ -42,6 +42,8 @@ Route::middleware(["auth:sanctum"])->group(function () {
         Route::get("me/cliente", [ClientesController::class, "me"]);
         Route::post("logout/cliente", [ClientesController::class, "logout"]);
         Route::put("actualizarCliente/{id}", [ClientesController::class, "updateCliente"]);
+        Route::put("cambiar/clave/cliente/{id}", [ClientesController::class, "cambiarClave"]);
+        Route::put("cambiar/correo/cliente/{id}", [ClientesController::class, "cambiarCorreo"]);
     });
 });
 
