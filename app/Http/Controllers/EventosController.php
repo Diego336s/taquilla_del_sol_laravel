@@ -13,7 +13,38 @@ class EventosController extends Controller
     public function index()
     {
         $eventos = Eventos::all();
-        return response()->json($eventos, 200);
+
+        if (!$eventos || $eventos->isEmpty()) {
+            return response()->json([
+                "success" => false,
+                "message" => "No hay eventos vigentes"
+            ]);
+        }
+
+        return response()->json([
+            "success" => true,
+            "eventos" =>  $eventos
+        ], 200);
+    }
+
+    public function eventosDisponibles()
+    {
+        $eventos = Eventos::with('categoria')
+            ->where('estado', 'activo')
+            ->get();
+
+
+        if (!$eventos || $eventos->isEmpty()) {
+            return response()->json([
+                "success" => false,
+                "message" => "No hay eventos vigentes"
+            ]);
+        }
+
+        return response()->json([
+            "success" => true,
+            "eventos" =>  $eventos
+        ], 200);
     }
     public function store(Request $request)
     {
@@ -68,10 +99,9 @@ class EventosController extends Controller
             $eventos->save();
             $eventos->refresh();
         }
- for ($i=0; $i < 270; $i++) { 
-    
- }
-        
+        for ($i = 0; $i < 270; $i++) {
+        }
+
         return response()->json([
             'success' => true,
             'message' => "Evento creado correctamente",

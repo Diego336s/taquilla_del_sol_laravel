@@ -18,7 +18,7 @@ class CategoriasController extends Controller
     public function store(Request $request){
 
         $Validator = Validator::make($request->all(),[
-            'nombre'=>'required/string/max:100',
+            'nombre'=>'required|string|max:100',
         ]);
         if($Validator->fails()){
             return response()->json($Validator->errors(), 400);

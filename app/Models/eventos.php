@@ -22,7 +22,7 @@ class Eventos extends Model
     ];
     public function categoria()
     {
-        return $this->belongsTo(categorias::class, 'id');
+        return $this->belongsTo(categorias::class, "categoria_id", 'id');
     }
 
     public function asientosEventos()
