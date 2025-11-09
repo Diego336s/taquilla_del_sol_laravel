@@ -68,7 +68,10 @@ class EventosController extends Controller
             $eventos->save();
             $eventos->refresh();
         }
-
+ for ($i=0; $i < 270; $i++) { 
+    
+ }
+        
         return response()->json([
             'success' => true,
             'message' => "Evento creado correctamente",

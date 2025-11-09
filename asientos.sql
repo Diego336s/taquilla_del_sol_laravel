@@ -1,16 +1,11 @@
--- phpMyAdmin SQL Dump
--- version 5.2.1
--- https://www.phpmyadmin.net/
 --
--- Servidor: 127.0.0.1
--- Tiempo de generación: 04-11-2025 a las 20:26:00
--- Versión del servidor: 10.4.32-MariaDB
--- Versión de PHP: 8.2.12
+-- Script SQL reorganizado - taquillaria_del_sol.asientos
+-- IDs re-secuenciados para eliminar saltos.
+--
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
 SET time_zone = "+00:00";
-
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -18,29 +13,32 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Base de datos: `taquillaria_del_sol`
+-- Base de datos: taquillaria_del_sol
 --
-
 -- --------------------------------------------------------
-
 --
--- Estructura de tabla para la tabla `asientos`
+-- Estructura de tabla para la tabla asientos (Manteniendo la estructura original)
 --
 
-CREATE TABLE `asientos` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `ubicacion` varchar(255) NOT NULL,
-  `fila` varchar(255) NOT NULL,
-  `numero` int(11) NOT NULL, 
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL
+CREATE TABLE IF NOT EXISTS asientos (
+  id bigint(20) UNSIGNED NOT NULL,
+  ubicacion varchar(255) NOT NULL,
+  fila varchar(255) NOT NULL,
+  numero int(11) NOT NULL,
+  created_at timestamp NULL DEFAULT NULL,
+  updated_at timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
--- Volcado de datos para la tabla `asientos`
+-- ELIMINAR DATOS VIEJOS antes de la nueva inserción
 --
+TRUNCATE TABLE asientos;
 
-INSERT INTO `asientos` (`id`, `ubicacion`, `fila`, `numero`, `created_at`, `updated_at`) VALUES
+--
+-- VOLCADO DE DATOS CON IDS REORGANIZADOS
+--
+INSERT INTO asientos (id, ubicacion, fila, numero, created_at, updated_at) VALUES
 (1, 'Zona General', 'A', 1, '2025-11-01 00:57:07', '2025-11-01 00:57:07'),
 (2, 'Zona General', 'A', 2, '2025-11-01 00:57:07', '2025-11-01 00:57:07'),
 (3, 'Zona General', 'A', 3, '2025-11-01 00:57:07', '2025-11-01 00:57:07'),
@@ -251,86 +249,72 @@ INSERT INTO `asientos` (`id`, `ubicacion`, `fila`, `numero`, `created_at`, `upda
 (208, 'Palco Derecho primer piso', 'P1', 18, '2025-11-01 00:59:32', '2025-11-01 00:59:32'),
 (209, 'Palco Derecho primer piso', 'P1', 19, '2025-11-01 00:59:32', '2025-11-01 00:59:32'),
 (210, 'Palco Derecho primer piso', 'P1', 20, '2025-11-01 00:59:32', '2025-11-01 00:59:32'),
-(241, 'Palco Izquierdo segundo piso', 'P2', 1, '2025-11-01 01:01:02', '2025-11-01 01:01:02'),
-(242, 'Palco Izquierdo segundo piso', 'P2', 2, '2025-11-01 01:01:02', '2025-11-01 01:01:02'),
-(243, 'Palco Izquierdo segundo piso', 'P2', 3, '2025-11-01 01:01:02', '2025-11-01 01:01:02'),
-(244, 'Palco Izquierdo segundo piso', 'P2', 4, '2025-11-01 01:01:02', '2025-11-01 01:01:02'),
-(245, 'Palco Izquierdo segundo piso', 'P2', 5, '2025-11-01 01:01:02', '2025-11-01 01:01:02'),
-(246, 'Palco Izquierdo segundo piso', 'P2', 6, '2025-11-01 01:01:02', '2025-11-01 01:01:02'),
-(247, 'Palco Izquierdo segundo piso', 'P2', 7, '2025-11-01 01:01:02', '2025-11-01 01:01:02'),
-(248, 'Palco Izquierdo segundo piso', 'P2', 8, '2025-11-01 01:01:02', '2025-11-01 01:01:02'),
-(249, 'Palco Izquierdo segundo piso', 'P2', 9, '2025-11-01 01:01:02', '2025-11-01 01:01:02'),
-(250, 'Palco Izquierdo segundo piso', 'P2', 10, '2025-11-01 01:01:02', '2025-11-01 01:01:02'),
-(251, 'Palco Izquierdo segundo piso', 'P2', 11, '2025-11-01 01:01:02', '2025-11-01 01:01:02'),
-(252, 'Palco Izquierdo segundo piso', 'P2', 12, '2025-11-01 01:01:02', '2025-11-01 01:01:02'),
-(253, 'Palco Izquierdo segundo piso', 'P2', 13, '2025-11-01 01:01:02', '2025-11-01 01:01:02'),
-(254, 'Palco Izquierdo segundo piso', 'P2', 14, '2025-11-01 01:01:02', '2025-11-01 01:01:02'),
-(255, 'Palco Izquierdo segundo piso', 'P2', 15, '2025-11-01 01:01:02', '2025-11-01 01:01:02'),
-(256, 'Palco Izquierdo segundo piso', 'P2', 16, '2025-11-01 01:01:02', '2025-11-01 01:01:02'),
-(257, 'Palco Izquierdo segundo piso', 'P2', 17, '2025-11-01 01:01:02', '2025-11-01 01:01:02'),
-(258, 'Palco Izquierdo segundo piso', 'P2', 18, '2025-11-01 01:01:02', '2025-11-01 01:01:02'),
-(259, 'Palco Izquierdo segundo piso', 'P2', 19, '2025-11-01 01:01:02', '2025-11-01 01:01:02'),
-(260, 'Palco Izquierdo segundo piso', 'P2', 20, '2025-11-01 01:01:02', '2025-11-01 01:01:02'),
-(261, 'Palco Derecho segundo piso', 'P2', 1, '2025-11-01 01:01:24', '2025-11-01 01:01:24'),
-(262, 'Palco Derecho segundo piso', 'P2', 2, '2025-11-01 01:01:24', '2025-11-01 01:01:24'),
-(263, 'Palco Derecho segundo piso', 'P2', 3, '2025-11-01 01:01:24', '2025-11-01 01:01:24'),
-(264, 'Palco Derecho segundo piso', 'P2', 4, '2025-11-01 01:01:24', '2025-11-01 01:01:24'),
-(265, 'Palco Derecho segundo piso', 'P2', 5, '2025-11-01 01:01:24', '2025-11-01 01:01:24'),
-(266, 'Palco Derecho segundo piso', 'P2', 6, '2025-11-01 01:01:24', '2025-11-01 01:01:24'),
-(267, 'Palco Derecho segundo piso', 'P2', 7, '2025-11-01 01:01:24', '2025-11-01 01:01:24'),
-(268, 'Palco Derecho segundo piso', 'P2', 8, '2025-11-01 01:01:24', '2025-11-01 01:01:24'),
-(269, 'Palco Derecho segundo piso', 'P2', 9, '2025-11-01 01:01:24', '2025-11-01 01:01:24'),
-(270, 'Palco Derecho segundo piso', 'P2', 10, '2025-11-01 01:01:24', '2025-11-01 01:01:24'),
-(271, 'Palco Derecho segundo piso', 'P2', 11, '2025-11-01 01:01:24', '2025-11-01 01:01:24'),
-(272, 'Palco Derecho segundo piso', 'P2', 12, '2025-11-01 01:01:24', '2025-11-01 01:01:24'),
-(273, 'Palco Derecho segundo piso', 'P2', 13, '2025-11-01 01:01:24', '2025-11-01 01:01:24'),
-(274, 'Palco Derecho segundo piso', 'P2', 14, '2025-11-01 01:01:24', '2025-11-01 01:01:24'),
-(275, 'Palco Derecho segundo piso', 'P2', 15, '2025-11-01 01:01:24', '2025-11-01 01:01:24'),
-(276, 'Palco Derecho segundo piso', 'P2', 16, '2025-11-01 01:01:24', '2025-11-01 01:01:24'),
-(277, 'Palco Derecho segundo piso', 'P2', 17, '2025-11-01 01:01:24', '2025-11-01 01:01:24'),
-(278, 'Palco Derecho segundo piso', 'P2', 18, '2025-11-01 01:01:24', '2025-11-01 01:01:24'),
-(279, 'Palco Derecho segundo piso', 'P2', 19, '2025-11-01 01:01:24', '2025-11-01 01:01:24'),
-(280, 'Palco Derecho segundo piso', 'P2', 20, '2025-11-01 01:01:24', '2025-11-01 01:01:24'),
-(281, 'Palco Trasero segundo piso', 'P2', 1, '2025-11-01 01:01:46', '2025-11-01 01:01:46'),
-(282, 'Palco Trasero segundo piso', 'P2', 2, '2025-11-01 01:01:46', '2025-11-01 01:01:46'),
-(283, 'Palco Trasero segundo piso', 'P2', 3, '2025-11-01 01:01:46', '2025-11-01 01:01:46'),
-(284, 'Palco Trasero segundo piso', 'P2', 4, '2025-11-01 01:01:46', '2025-11-01 01:01:46'),
-(285, 'Palco Trasero segundo piso', 'P2', 5, '2025-11-01 01:01:46', '2025-11-01 01:01:46'),
-(286, 'Palco Trasero segundo piso', 'P2', 6, '2025-11-01 01:01:46', '2025-11-01 01:01:46'),
-(287, 'Palco Trasero segundo piso', 'P2', 7, '2025-11-01 01:01:46', '2025-11-01 01:01:46'),
-(288, 'Palco Trasero segundo piso', 'P2', 8, '2025-11-01 01:01:46', '2025-11-01 01:01:46'),
-(289, 'Palco Trasero segundo piso', 'P2', 9, '2025-11-01 01:01:46', '2025-11-01 01:01:46'),
-(290, 'Palco Trasero segundo piso', 'P2', 10, '2025-11-01 01:01:46', '2025-11-01 01:01:46'),
-(301, 'Palco Trasero primer piso', 'P1', 1, '2025-11-01 13:15:49', '2025-11-01 13:15:49'),
-(302, 'Palco Trasero primer piso', 'P1', 2, '2025-11-01 13:15:49', '2025-11-01 13:15:49'),
-(303, 'Palco Trasero primer piso', 'P1', 3, '2025-11-01 13:15:49', '2025-11-01 13:15:49'),
-(304, 'Palco Trasero primer piso', 'P1', 4, '2025-11-01 13:15:49', '2025-11-01 13:15:49'),
-(305, 'Palco Trasero primer piso', 'P1', 5, '2025-11-01 13:15:49', '2025-11-01 13:15:49'),
-(306, 'Palco Trasero primer piso', 'P1', 6, '2025-11-01 13:15:49', '2025-11-01 13:15:49'),
-(307, 'Palco Trasero primer piso', 'P1', 7, '2025-11-01 13:15:49', '2025-11-01 13:15:49'),
-(308, 'Palco Trasero primer piso', 'P1', 8, '2025-11-01 13:15:49', '2025-11-01 13:15:49'),
-(309, 'Palco Trasero primer piso', 'P1', 9, '2025-11-01 13:15:49', '2025-11-01 13:15:49'),
-(310, 'Palco Trasero primer piso', 'P1', 10, '2025-11-01 13:15:49', '2025-11-01 13:15:49');
+(211, 'Palco Izquierdo segundo piso', 'P2', 1, '2025-11-01 01:01:02', '2025-11-01 01:01:02'),
+(212, 'Palco Izquierdo segundo piso', 'P2', 2, '2025-11-01 01:01:02', '2025-11-01 01:01:02'),
+(213, 'Palco Izquierdo segundo piso', 'P2', 3, '2025-11-01 01:01:02', '2025-11-01 01:01:02'),
+(214, 'Palco Izquierdo segundo piso', 'P2', 4, '2025-11-01 01:01:02', '2025-11-01 01:01:02'),
+(215, 'Palco Izquierdo segundo piso', 'P2', 5, '2025-11-01 01:01:02', '2025-11-01 01:01:02'),
+(216, 'Palco Izquierdo segundo piso', 'P2', 6, '2025-11-01 01:01:02', '2025-11-01 01:01:02'),
+(217, 'Palco Izquierdo segundo piso', 'P2', 7, '2025-11-01 01:01:02', '2025-11-01 01:01:02'),
+(218, 'Palco Izquierdo segundo piso', 'P2', 8, '2025-11-01 01:01:02', '2025-11-01 01:01:02'),
+(219, 'Palco Izquierdo segundo piso', 'P2', 9, '2025-11-01 01:01:02', '2025-11-01 01:01:02'),
+(220, 'Palco Izquierdo segundo piso', 'P2', 10, '2025-11-01 01:01:02', '2025-11-01 01:01:02'),
+(221, 'Palco Izquierdo segundo piso', 'P2', 11, '2025-11-01 01:01:02', '2025-11-01 01:01:02'),
+(222, 'Palco Izquierdo segundo piso', 'P2', 12, '2025-11-01 01:01:02', '2025-11-01 01:01:02'),
+(223, 'Palco Izquierdo segundo piso', 'P2', 13, '2025-11-01 01:01:02', '2025-11-01 01:01:02'),
+(224, 'Palco Izquierdo segundo piso', 'P2', 14, '2025-11-01 01:01:02', '2025-11-01 01:01:02'),
+(225, 'Palco Izquierdo segundo piso', 'P2', 15, '2025-11-01 01:01:02', '2025-11-01 01:01:02'),
+(226, 'Palco Izquierdo segundo piso', 'P2', 16, '2025-11-01 01:01:02', '2025-11-01 01:01:02'),
+(227, 'Palco Izquierdo segundo piso', 'P2', 17, '2025-11-01 01:01:02', '2025-11-01 01:01:02'),
+(228, 'Palco Izquierdo segundo piso', 'P2', 18, '2025-11-01 01:01:02', '2025-11-01 01:01:02'),
+(229, 'Palco Izquierdo segundo piso', 'P2', 19, '2025-11-01 01:01:02', '2025-11-01 01:01:02'),
+(230, 'Palco Izquierdo segundo piso', 'P2', 20, '2025-11-01 01:01:02', '2025-11-01 01:01:02'),
+(231, 'Palco Derecho segundo piso', 'P2', 1, '2025-11-01 01:01:24', '2025-11-01 01:01:24'),
+(232, 'Palco Derecho segundo piso', 'P2', 2, '2025-11-01 01:01:24', '2025-11-01 01:01:24'),
+(233, 'Palco Derecho segundo piso', 'P2', 3, '2025-11-01 01:01:24', '2025-11-01 01:01:24'),
+(234, 'Palco Derecho segundo piso', 'P2', 4, '2025-11-01 01:01:24', '2025-11-01 01:01:24'),
+(235, 'Palco Derecho segundo piso', 'P2', 5, '2025-11-01 01:01:24', '2025-11-01 01:01:24'),
+(236, 'Palco Derecho segundo piso', 'P2', 6, '2025-11-01 01:01:24', '2025-11-01 01:01:24'),
+(237, 'Palco Derecho segundo piso', 'P2', 7, '2025-11-01 01:01:24', '2025-11-01 01:01:24'),
+(238, 'Palco Derecho segundo piso', 'P2', 8, '2025-11-01 01:01:24', '2025-11-01 01:01:24'),
+(239, 'Palco Derecho segundo piso', 'P2', 9, '2025-11-01 01:01:24', '2025-11-01 01:01:24'),
+(240, 'Palco Derecho segundo piso', 'P2', 10, '2025-11-01 01:01:24', '2025-11-01 01:01:24'),
+(241, 'Palco Derecho segundo piso', 'P2', 11, '2025-11-01 01:01:24', '2025-11-01 01:01:24'),
+(242, 'Palco Derecho segundo piso', 'P2', 12, '2025-11-01 01:01:24', '2025-11-01 01:01:24'),
+(243, 'Palco Derecho segundo piso', 'P2', 13, '2025-11-01 01:01:24', '2025-11-01 01:01:24'),
+(244, 'Palco Derecho segundo piso', 'P2', 14, '2025-11-01 01:01:24', '2025-11-01 01:01:24'),
+(245, 'Palco Derecho segundo piso', 'P2', 15, '2025-11-01 01:01:24', '2025-11-01 01:01:24'),
+(246, 'Palco Derecho segundo piso', 'P2', 16, '2025-11-01 01:01:24', '2025-11-01 01:01:24'),
+(247, 'Palco Derecho segundo piso', 'P2', 17, '2025-11-01 01:01:24', '2025-11-01 01:01:24'),
+(248, 'Palco Derecho segundo piso', 'P2', 18, '2025-11-01 01:01:24', '2025-11-01 01:01:24'),
+(249, 'Palco Derecho segundo piso', 'P2', 19, '2025-11-01 01:01:24', '2025-11-01 01:01:24'),
+(250, 'Palco Derecho segundo piso', 'P2', 20, '2025-11-01 01:01:24', '2025-11-01 01:01:24'),
+(251, 'Palco Trasero segundo piso', 'P2', 1, '2025-11-01 01:01:46', '2025-11-01 01:01:46'),
+(252, 'Palco Trasero segundo piso', 'P2', 2, '2025-11-01 01:01:46', '2025-11-01 01:01:46'),
+(253, 'Palco Trasero segundo piso', 'P2', 3, '2025-11-01 01:01:46', '2025-11-01 01:01:46'),
+(254, 'Palco Trasero segundo piso', 'P2', 4, '2025-11-01 01:01:46', '2025-11-01 01:01:46'),
+(255, 'Palco Trasero segundo piso', 'P2', 5, '2025-11-01 01:01:46', '2025-11-01 01:01:46'),
+(256, 'Palco Trasero segundo piso', 'P2', 6, '2025-11-01 01:01:46', '2025-11-01 01:01:46'),
+(257, 'Palco Trasero segundo piso', 'P2', 7, '2025-11-01 01:01:46', '2025-11-01 01:01:46'),
+(258, 'Palco Trasero segundo piso', 'P2', 8, '2025-11-01 01:01:46', '2025-11-01 01:01:46'),
+(259, 'Palco Trasero segundo piso', 'P2', 9, '2025-11-01 01:01:46', '2025-11-01 01:01:46'),
+(260, 'Palco Trasero segundo piso', 'P2', 10, '2025-11-01 01:01:46', '2025-11-01 01:01:46'),
+(261, 'Palco Trasero primer piso', 'P1', 1, '2025-11-01 13:15:49', '2025-11-01 13:15:49'),
+(262, 'Palco Trasero primer piso', 'P1', 2, '2025-11-01 13:15:49', '2025-11-01 13:15:49'),
+(263, 'Palco Trasero primer piso', 'P1', 3, '2025-11-01 13:15:49', '2025-11-01 13:15:49'),
+(264, 'Palco Trasero primer piso', 'P1', 4, '2025-11-01 13:15:49', '2025-11-01 13:15:49'),
+(265, 'Palco Trasero primer piso', 'P1', 5, '2025-11-01 13:15:49', '2025-11-01 13:15:49'),
+(266, 'Palco Trasero primer piso', 'P1', 6, '2025-11-01 13:15:49', '2025-11-01 13:15:49'),
+(267, 'Palco Trasero primer piso', 'P1', 7, '2025-11-01 13:15:49', '2025-11-01 13:15:49'),
+(268, 'Palco Trasero primer piso', 'P1', 8, '2025-11-01 13:15:49', '2025-11-01 13:15:49'),
+(269, 'Palco Trasero primer piso', 'P1', 9, '2025-11-01 13:15:49', '2025-11-01 13:15:49'),
+(270, 'Palco Trasero primer piso', 'P1', 10, '2025-11-01 13:15:49', '2025-11-01 13:15:49');
 
 --
--- Índices para tablas volcadas
+-- Reajuste de AUTO_INCREMENT
 --
-
---
--- Indices de la tabla `asientos`
---
-ALTER TABLE `asientos`
-  ADD PRIMARY KEY (`id`);
-
---
--- AUTO_INCREMENT de las tablas volcadas
---
-
---
--- AUTO_INCREMENT de la tabla `asientos`
---
-ALTER TABLE `asientos`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=311;
+ALTER TABLE asientos
+  MODIFY id bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=271;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
