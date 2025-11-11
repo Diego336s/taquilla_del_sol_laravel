@@ -13,9 +13,10 @@ return new class extends Migration
     {
         Schema::create('asientos_eventos', function (Blueprint $table) {
             $table->id();
-            $table->foreignId("evento_id")->constrained("eventos","id");
-            $table->foreignId("asiento_id")->constrained("asientos","id");
+            $table->foreignId("evento_id")->constrained("eventos", "id");
+            $table->foreignId("asiento_id")->constrained("asientos", "id");
             $table->boolean("disponible");
+            $table->foreignId("precio_id")->constrained("precios_eventos", "id");
             $table->timestamps();
         });
     }

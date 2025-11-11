@@ -20,15 +20,6 @@ SET time_zone = "+00:00";
 -- Estructura de tabla para la tabla asientos (Manteniendo la estructura original)
 --
 
-CREATE TABLE IF NOT EXISTS asientos (
-  id bigint(20) UNSIGNED NOT NULL,
-  ubicacion varchar(255) NOT NULL,
-  fila varchar(255) NOT NULL,
-  numero int(11) NOT NULL,
-  created_at timestamp NULL DEFAULT NULL,
-  updated_at timestamp NULL DEFAULT NULL,
-  PRIMARY KEY (id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- ELIMINAR DATOS VIEJOS antes de la nueva inserción
@@ -38,7 +29,7 @@ TRUNCATE TABLE asientos;
 --
 -- VOLCADO DE DATOS CON IDS REORGANIZADOS
 --
-INSERT INTO asientos (id, ubicacion, fila, numero, created_at, updated_at) VALUES
+INSERT INTO asientos (id, ubicacion_id, fila, numero, created_at, updated_at) VALUES
 (1, 'Zona General', 'A', 1, '2025-11-01 00:57:07', '2025-11-01 00:57:07'),
 (2, 'Zona General', 'A', 2, '2025-11-01 00:57:07', '2025-11-01 00:57:07'),
 (3, 'Zona General', 'A', 3, '2025-11-01 00:57:07', '2025-11-01 00:57:07'),
