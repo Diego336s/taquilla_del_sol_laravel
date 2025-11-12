@@ -238,6 +238,21 @@ class EventosController extends Controller
             ]);
         }
 
+        $validacionParaPrecios = Validator::make($request->all(), [
+            "precioPrimerPiso" => "required|integer",
+            "precioSugundoPiso" => "required|integer",
+            "precioGeneral" => "required|integer"
+        ]);
+        if ($validacionParaPrecios->fails()) {
+            DB::rollBack();
+            return response()->json([
+                "success" => false,
+                "message" => "Error de validaciones en el servidor.",
+                "error" =>  $validacionParaPrecios->errors()
+            ]);
+        }
+
+
         $validator_datos = $validacionParaEvento->validated();
         $imagen_file = $request->file('imagen');
 
@@ -274,19 +289,6 @@ class EventosController extends Controller
             $eventos->refresh();
         }
 
-        $validacionParaPrecios = Validator::make($request->all(), [
-            "precioPrimerPiso" => "required|integer",
-            "precioSugundoPiso" => "required|integer",
-            "precioGeneral" => "required|integer"
-        ]);
-        if ($validacionParaPrecios->fails()) {
-            DB::rollBack();
-            return response()->json([
-                "success" => false,
-                "message" => "Error de validaciones en el servidor.",
-                "error" =>  $validacionParaPrecios->errors()
-            ]);
-        }
 
         for ($i = 1; $i <= 7; $i++) {
             if ($i === 1) {
@@ -309,7 +311,7 @@ class EventosController extends Controller
                 ]);
             }
         }
-        
+
         DB::commit();
 
         return response()->json([
