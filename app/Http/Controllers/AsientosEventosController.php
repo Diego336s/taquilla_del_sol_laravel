@@ -14,7 +14,7 @@ class AsientosEventosController extends Controller
             ->join('ubicacion_asientos as u', 'a.ubicacion_id', '=', 'u.id')
             ->join('precios_eventos as p', 'ae.precio_id', '=', 'p.id')
             ->where('ae.evento_id', $id)
-            ->select('a.fila', 'a.numero', 'u.ubicacion', 'p.precio', 'ae.disponible')
+            ->select('a.fila', 'a.numero', 'u.ubicacion', 'p.precio', 'ae.disponible', "ae.id as id_asiento_evento")
             ->get();
         return response()->json([
             "success" => true,

@@ -237,7 +237,7 @@ class EventosController extends Controller
             ], 400);
         }
 
-        
+
         $validacionParaPrecios = Validator::make($request->all(), [
             "precioPrimerPiso" => "required|integer",
             "precioSugundoPiso" => "required|integer",
@@ -252,6 +252,12 @@ class EventosController extends Controller
             ], 400);
         }
 
+        if (Eventos::where("fecha", $request->fecha)->exists()) {
+            return response()->json([
+                "success" => false,
+                "message" => "Ya existe un evento registrado en esta fecha."
+            ], 400);
+        }
 
         $validator_datos = $validacionParaEvento->validated();
         $imagen_file = $request->file('imagen');
