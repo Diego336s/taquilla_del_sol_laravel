@@ -15,6 +15,6 @@ class reservaAsientos extends Model
         return $this->belongsToMany(Ticket::class, 'id');
     }
     public function asientosEventos(){
-        return $this->belongsToMany(asientosEventos::class, 'id');
+        return $this->belongsToMany(asientosEventos::class, "asiento_evento_id",'id');
     }
 }

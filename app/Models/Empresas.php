@@ -25,6 +25,6 @@ class Empresas extends Model
     ];
 
     public function eventos(){
-     return $this->hasMany(Eventos::class, 'empresa_id');
+     return $this->hasMany(Eventos::class, 'empresa_id', "id");
     }
 }

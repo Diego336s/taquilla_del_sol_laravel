@@ -33,8 +33,8 @@ class EmpresasController extends Controller
             'nit'                     => 'required|integer|unique:empresas,nit',
             'representante_legal'     => 'required|string|max:200',
             'documento_representante' => 'required|integer|unique:empresas,documento_representante',
-            'nombre_contacto'         => 'nullable|string|max:200',
-            'telefono'                => 'nullable|string|max:20',
+            'nombre_contacto'         => 'required|string|max:200',
+            'telefono'                => 'required|string|max:20',
             'correo'                  => 'required|email|unique:empresas,correo',
             'clave'                   => 'required|string|max:200',
         ]);

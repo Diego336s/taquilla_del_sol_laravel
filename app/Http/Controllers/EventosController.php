@@ -2,38 +2,258 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Asientos;
+use App\Models\asientosEventos;
 use App\Models\Eventos;
+use App\Models\preciosEvento;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\DB;
+
+use function PHPUnit\Framework\isEmpty;
+use function Termwind\parse;
 
 class EventosController extends Controller
 {
     public function index()
     {
         $eventos = Eventos::all();
-        return response()->json($eventos, 200);
+
+        if (!$eventos || $eventos->isEmpty()) {
+            return response()->json([
+                "success" => false,
+                "message" => "No hay eventos vigentes"
+            ]);
+        }
+
+        return response()->json([
+            "success" => true,
+            "eventos" =>  $eventos
+        ], 200);
     }
-    public function store(Request $request)
+
+    public function cambioDeEstadoDelEvento(Request $request, $id)
     {
+        DB::beginTransaction();
+
         $validator = Validator::make($request->all(), [
-            'titulo'        => 'required|string|max:200',
-            'descripcion'   => 'nullable|string',
-            'fecha'         => 'required|date',
-            'hora_inicio'   => 'required|string|size:8',
-            'hora_final'    => 'required|string|size:8',
-            'imagen'        => 'nullable|image',
-            'estado'        => 'required|in:activo,pendiente,cancelado,finalizado',
-            'empresa_id'    => 'required|integer|exists:empresas,id',
-            'categoria_id'  => 'required|integer|exists:categorias,id',
+            "estado" => "required|in:activo,pendiente,cancelado,finalizado"
         ]);
 
         if ($validator->fails()) {
-            return response()->json($validator->errors(), 422);
+            DB::rollBack();
+            return response()->json([
+                "success" => false,
+                "message" => "Error de validaciones en el servidor.",
+                "error" => $validator->errors()
+            ], 400);
         }
 
-        $validator_datos = $validator->validated();
+        try {
+            $evento = Eventos::find($id);
+            if (!$evento) {
+                DB::rollBack();
+                return response()->json([
+                    "success" => false,
+                    'message' => 'Evento no encontrado'
+                ], 400);
+            }
+
+
+
+            if ($request->estado === "activo") {
+                $precio_id = 0;
+                for ($i = 1; $i <= 270; $i++) {
+                    $asiento = Asientos::find($i);
+                    switch ($asiento->ubicacion_id) {
+                        case 1:
+                            $precioEvento = preciosEvento::where("evento_id", $id)
+                                ->where("ubicacion_id", 1)
+                                ->first();
+                            if (!$precioEvento) {
+                                DB::rollBack();
+                                return response()->json([
+                                    "success" => false,
+                                    "message" => "No se encontró precio para la ubicación ID: {$asiento->ubicacion_id}"
+                                ], 400);
+                            }
+                            $precio_id = $precioEvento->id;
+                            break;
+                        case 2:
+                            $precioEvento = preciosEvento::where("evento_id", $id)
+                                ->where("ubicacion_id", 2)
+                                ->first();
+                            if (!$precioEvento) {
+                                DB::rollBack();
+                                return response()->json([
+                                    "success" => false,
+                                    "message" => "No se encontró precio para la ubicación ID: {$asiento->ubicacion_id}"
+                                ], 400);
+                            }
+                            $precio_id = $precioEvento->id;
+                            break;
+                        case 3:
+                            $precioEvento = preciosEvento::where("evento_id", $id)
+                                ->where("ubicacion_id", 3)
+                                ->first();
+                            if (!$precioEvento) {
+                                DB::rollBack();
+                                return response()->json([
+                                    "success" => false,
+                                    "message" => "No se encontró precio para la ubicación ID: {$asiento->ubicacion_id}"
+                                ], 400);
+                            }
+                            $precio_id = $precioEvento->id;
+                            break;
+                        case 4:
+                            $precioEvento = preciosEvento::where("evento_id", $id)
+                                ->where("ubicacion_id", 4)
+                                ->first();
+                            if (!$precioEvento) {
+                                DB::rollBack();
+                                return response()->json([
+                                    "success" => false,
+                                    "message" => "No se encontró precio para la ubicación ID: {$asiento->ubicacion_id}"
+                                ], 400);
+                            }
+                            $precio_id = $precioEvento->id;
+                            break;
+                        case 5:
+                            $precioEvento = preciosEvento::where("evento_id", $id)
+                                ->where("ubicacion_id", 5)
+                                ->first();
+                            if (!$precioEvento) {
+                                DB::rollBack();
+                                return response()->json([
+                                    "success" => false,
+                                    "message" => "No se encontró precio para la ubicación ID: {$asiento->ubicacion_id}"
+                                ], 400);
+                            }
+                            $precio_id = $precioEvento->id;
+                            break;
+
+                        case 6:
+                            $precioEvento = preciosEvento::where("evento_id", $id)
+                                ->where("ubicacion_id", 6)
+                                ->first();
+                            if (!$precioEvento) {
+                                DB::rollBack();
+                                return response()->json([
+                                    "success" => false,
+                                    "message" => "No se encontró precio para la ubicación ID: {$asiento->ubicacion_id}"
+                                ], 400);
+                            }
+                            $precio_id = $precioEvento->id;
+                            break;
+
+                        case 7:
+                            $precioEvento = preciosEvento::where("evento_id", $id)
+                                ->where("ubicacion_id", 7)
+                                ->first();
+                            if (!$precioEvento) {
+                                DB::rollBack();
+                                return response()->json([
+                                    "success" => false,
+                                    "message" => "No se encontró precio para la ubicación ID: {$asiento->ubicacion_id}"
+                                ], 400);
+                            }
+                            $precio_id = $precioEvento->id;
+                            break;
+
+                        default:
+                            DB::rollBack();
+                            return response()->json([
+                                "success" => false,
+                                "message" => "Error al crear los asientos para el evento $evento->titulo."
+                            ]);
+                            break;
+                    }
+
+                    asientosEventos::create([
+                        "evento_id" => $id,
+                        "asiento_id" => $asiento->id,
+                        "disponible" => true,
+                        "precio_id" => $precio_id
+                    ]);
+                }
+            }
+            $evento->update($validator->validated());
+            DB::commit();
+            return response()->json([
+                "success" => true,
+                "message" => "El evento $evento->tiitulo se ha aceptado correctamente."
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                "success" => false,
+                "message" => "Error al cambiar el estado del evento: " . $e->getMessage()
+            ]);
+        }
+    }
+
+    public function eventosDisponibles()
+    {
+        $eventos = Eventos::with('categoria')
+            ->where('estado', 'activo')
+            ->get();
+
+
+        if (!$eventos || $eventos->isEmpty()) {
+            return response()->json([
+                "success" => false,
+                "message" => "No hay eventos vigentes"
+            ]);
+        }
+
+        return response()->json([
+            "success" => true,
+            "eventos" =>  $eventos
+        ], 200);
+    }
+    public function store(Request $request)
+    {
+        DB::beginTransaction();
+
+        $validacionParaEvento = Validator::make($request->all(), [
+            'titulo'        => 'required|string|max:200',
+            'descripcion'   => 'required|string',
+            'fecha'         => 'required|date',
+            'hora_inicio'   => 'required|string|size:8',
+            'hora_final'    => 'required|string|size:8',
+            'imagen'        => 'required|image',
+            'estado'        => 'required|in:activo,pendiente,cancelado,finalizado',
+            'empresa_id'    => 'required|integer|exists:empresas,id',
+            'categoria_id'  => 'required|integer|exists:categorias,id',
+        ],400);
+
+        if ($validacionParaEvento->fails()) {
+            DB::rollBack();
+            return response()->json([
+                "success" => false,
+                "message" => "Error de validaciones en el servidor.",
+                "error" =>  $validacionParaEvento->errors()
+            ], 400);
+        }
+
+        $validacionParaPrecios = Validator::make($request->all(), [
+            "precioPrimerPiso" => "required|integer",
+            "precioSugundoPiso" => "required|integer",
+            "precioGeneral" => "required|integer"
+        ], 400);
+        if ($validacionParaPrecios->fails()) {
+            DB::rollBack();
+            return response()->json([
+                "success" => false,
+                "message" => "Error de validaciones en el servidor.",
+                "error" =>  $validacionParaPrecios->errors()
+            ], 400);
+        }
+
+
+        $validator_datos = $validacionParaEvento->validated();
         $imagen_file = $request->file('imagen');
 
         // 1. Separar el archivo de imagen de los datos para la creación inicial
@@ -43,7 +263,7 @@ class EventosController extends Controller
 
         // 2. Crear el evento en la DB (sin la ruta de la imagen)
         $eventos = Eventos::create($validator_datos);
-
+        $idEventoCreado = $eventos->id;
         // 3. Procesar y guardar la imagen dentro de la carpeta 'eventos/{slug}'
         if ($imagen_file) {
             $file = $imagen_file;
@@ -69,11 +289,36 @@ class EventosController extends Controller
             $eventos->refresh();
         }
 
+
+        for ($i = 1; $i <= 7; $i++) {
+            if ($i === 1) {
+                preciosEvento::create([
+                    "evento_id" => $idEventoCreado,
+                    "ubicacion_id" => $i,
+                    "precio" => $request->precioGeneral
+                ]);
+            } else if ($i === 2 || $i === 3 || $i === 7) {
+                preciosEvento::create([
+                    "evento_id" => $idEventoCreado,
+                    "ubicacion_id" => $i,
+                    "precio" => $request->precioPrimerPiso
+                ]);
+            } else if ($i === 4 || $i === 5 || $i === 6) {
+                preciosEvento::create([
+                    "evento_id" => $idEventoCreado,
+                    "ubicacion_id" => $i,
+                    "precio" => $request->precioSugundoPiso
+                ]);
+            }
+        }
+
+        DB::commit();
+
         return response()->json([
             'success' => true,
-            'message' => "Evento creado correctamente",
+            'message' => "Solicitud del evento $request->titulo creada correctamente",
             'data' => $eventos
-        ], 201);
+        ], 200);
     }
 
 

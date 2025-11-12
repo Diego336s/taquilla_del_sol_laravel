@@ -10,12 +10,16 @@ class Asientos extends Model
 {
     use HasApiTokens, Notifiable;
     protected $fillable = [
-        "ubicacion",
+        "ubicacion_id",
         "fila",
         "numero"
     ];
-     public function reservaAsiento()
+    public function reservaAsiento()
     {
         return $this->belongsToMany(reservaAsientos::class, 'asiento_id');
+    }
+    public function ubicaciones()
+    {
+        return $this->belongsTo(ubicacionAsientos::class, "ubicacion_id", "id");
     }
 }

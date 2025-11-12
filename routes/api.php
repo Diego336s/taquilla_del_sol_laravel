@@ -8,6 +8,7 @@ use App\Http\Controllers\EventosController;
 use App\Http\Controllers\PagosController;
 use App\Http\Controllers\TicketController;
 use App\Http\Controllers\AsientosController;
+use App\Http\Controllers\AsientosEventosController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CodigoVerificacionController;
 use Illuminate\Http\Request;
@@ -93,9 +94,12 @@ Route::delete("eliminarCategoria/{id}", [CategoriasController::class, "destroy"]
 
 //Eventos
 Route::get("listarEventos", [EventosController::class, "index"]);
+Route::get("eventos/disponibles", [EventosController::class, "eventosDisponibles"]);
 Route::post("registrarEventos", [EventosController::class, "store"]);
 Route::put("actualizarEventos/{id}", [EventosController::class, "update"]);
 Route::delete("eliminarEventos/{id}", [EventosController::class, "destroy"]);
+Route::post("cambiar/estado/evento/{id}", [EventosController::class, "cambioDeEstadoDelEvento"]);
+
 
 //Tickets
 Route::get("listarTickets", [TicketController::class, "index"]);
@@ -110,6 +114,7 @@ Route::put("actualizarPagos/{id}", [PagosController::class, "update"]);
 Route::delete("eliminarPagos/{id}", [PagosController::class, "destroy"]);
 
 //Asientos
+Route::get("asientos/evento/{id}", [AsientosEventosController::class, "asientosPorEventento"]);
 Route::get("listarAsientos", [AsientosController::class, "index"]);
 Route::post("registrarAsientos", [AsientosController::class, "store"]);
 Route::get("mostrarAsiento/{id}", [AsientosController::class, "show"]);
