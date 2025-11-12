@@ -97,6 +97,8 @@ Route::get("eventos/disponibles", [EventosController::class, "eventosDisponibles
 Route::post("registrarEventos", [EventosController::class, "store"]);
 Route::put("actualizarEventos/{id}", [EventosController::class, "update"]);
 Route::delete("eliminarEventos/{id}", [EventosController::class, "destroy"]);
+Route::post("cambiar/estado/evento/{id}", [EventosController::class, "cambioDeEstadoDelEvento"]);
+
 
 //Tickets
 Route::get("listarTickets", [TicketController::class, "index"]);
