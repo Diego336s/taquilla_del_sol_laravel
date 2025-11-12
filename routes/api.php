@@ -8,6 +8,7 @@ use App\Http\Controllers\EventosController;
 use App\Http\Controllers\PagosController;
 use App\Http\Controllers\TicketController;
 use App\Http\Controllers\AsientosController;
+use App\Http\Controllers\AsientosEventosController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CodigoVerificacionController;
 use Illuminate\Http\Request;
@@ -110,6 +111,7 @@ Route::put("actualizarPagos/{id}", [PagosController::class, "update"]);
 Route::delete("eliminarPagos/{id}", [PagosController::class, "destroy"]);
 
 //Asientos
+Route::get("asientos/evento/{id}", [AsientosEventosController::class, "asientosPorEventento"]);
 Route::get("listarAsientos", [AsientosController::class, "index"]);
 Route::post("registrarAsientos", [AsientosController::class, "store"]);
 Route::get("mostrarAsiento/{id}", [AsientosController::class, "show"]);

@@ -227,7 +227,7 @@ class EventosController extends Controller
             'estado'        => 'required|in:activo,pendiente,cancelado,finalizado',
             'empresa_id'    => 'required|integer|exists:empresas,id',
             'categoria_id'  => 'required|integer|exists:categorias,id',
-        ]);
+        ],400);
 
         if ($validacionParaEvento->fails()) {
             DB::rollBack();
@@ -235,21 +235,21 @@ class EventosController extends Controller
                 "success" => false,
                 "message" => "Error de validaciones en el servidor.",
                 "error" =>  $validacionParaEvento->errors()
-            ]);
+            ], 400);
         }
 
         $validacionParaPrecios = Validator::make($request->all(), [
             "precioPrimerPiso" => "required|integer",
             "precioSugundoPiso" => "required|integer",
             "precioGeneral" => "required|integer"
-        ]);
+        ], 400);
         if ($validacionParaPrecios->fails()) {
             DB::rollBack();
             return response()->json([
                 "success" => false,
                 "message" => "Error de validaciones en el servidor.",
                 "error" =>  $validacionParaPrecios->errors()
-            ]);
+            ], 400);
         }
 
 
