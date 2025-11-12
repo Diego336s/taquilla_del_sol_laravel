@@ -27,12 +27,17 @@ class Eventos extends Model
 
     public function asientosEventos()
     {
-        return $this->hasMany(asientosEventos::class, 'id');
+        return $this->belongsToMany(asientosEventos::class, "evento_id",'id');
     }
     
     public function empresa()
     {
-        return $this->belongsTo(empresas::class, "id");
+        return $this->belongsTo(empresas::class, 'empresa_id', "id");
+    }
+
+     public function preciosEvento()
+    {
+        return $this->belongsToMany(preciosEvento::class, "evento_id", "id");
     }
 
     protected function imagen(): Attribute
