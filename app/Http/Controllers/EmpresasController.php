@@ -14,11 +14,17 @@ class EmpresasController extends Controller
     /**
      * Listar todas las empresas
      */
-    public function index()
-    {
-        $empresas = Empresas::all();
-        return response()->json($empresas, 200);
-    }
+   public function index()
+{
+    $empresas = Empresas::all();
+
+    return response()->json([
+        "success" => true,
+        "message" => "Empresas listadas correctamente",
+        "data" => $empresas
+    ], 200);
+}
+
     //crear una nueva empresa 
     public function store(Request $request)
     {
@@ -74,11 +80,31 @@ class EmpresasController extends Controller
 
     // Mostrar una empresa por ID
 
-    public function show(string $id)
-    {
-        $empresa = Empresas::findOrFail($id);
-        return response()->json($empresa, 200);
+    public function show($id)
+{
+    try {
+        $cliente = Clientes::find($id);
+
+        if (!$cliente) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Cliente no encontrado',
+            ], 404);
+        }
+
+        return response()->json([
+            'success' => true,
+            'data' => $cliente
+        ], 200);
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Error al obtener el cliente',
+            'error' => $e->getMessage()
+        ], 500);
     }
+}
+
 
     public function update(Request $request, string $id)
     {
