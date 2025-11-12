@@ -3,13 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Models\asientosEventos;
-use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class AsientosEventosController extends Controller
 {
     public function asientosPorEventento($id)
     {
-        $asientos = asientosEventos::table('asientos_eventos as ae')
+        $asientos = DB::table('asientos_eventos as ae')
             ->join('asientos as a', 'ae.asiento_id', '=', 'a.id')
             ->join('ubicacion_asientos as u', 'a.ubicacion_id', '=', 'u.id')
             ->join('precios_eventos as p', 'ae.precio_id', '=', 'p.id')
