@@ -19,6 +19,16 @@ use Illuminate\Support\Facades\Route;
 //     return $request->user();
 // })->middleware('auth:sanctum');
 
+//Comando para instalador de pagos
+//composer require stripe/stripe-php
+
+// Comando para la url del servidor
+// npm install -g cloudflared
+// cloudflared tunnel --url http://localhost:8000
+
+
+
+
 
 
 //** ----- REGISTRAR USUARIO ----- */
