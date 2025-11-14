@@ -11,6 +11,7 @@ use App\Http\Controllers\AsientosController;
 use App\Http\Controllers\AsientosEventosController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CodigoVerificacionController;
+use App\Http\Controllers\StripeWebhookController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -112,6 +113,9 @@ Route::get("listarPagos", [PagosController::class, "index"]);
 Route::post("registrarPagos", [PagosController::class, "store"]);
 Route::put("actualizarPagos/{id}", [PagosController::class, "update"]);
 Route::delete("eliminarPagos/{id}", [PagosController::class, "destroy"]);
+Route::post('/pago/stripe', [PagosController::class, 'crearSesionPago']);
+Route::post('/stripe/webhook', [StripeWebhookController::class, 'handle']);
+
 
 //Asientos
 Route::get("asientos/evento/{id}", [AsientosEventosController::class, "asientosPorEventento"]);

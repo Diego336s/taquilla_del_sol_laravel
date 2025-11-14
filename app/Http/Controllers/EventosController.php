@@ -251,71 +251,80 @@ class EventosController extends Controller
                 "error" =>  $validacionParaPrecios->errors()
             ], 400);
         }
+        try {
 
-        if (Eventos::where("fecha", $request->fecha)->exists()) {
-            return response()->json([
-                "success" => false,
-                "message" => "Ya existe un evento registrado en esta fecha."
-            ], 400);
-        }
-
-        $validator_datos = $validacionParaEvento->validated();
-        $imagen_file = $request->file('imagen');
-
-        // 1. Separar el archivo de imagen de los datos para la creación inicial
-        if ($imagen_file) {
-            unset($validator_datos['imagen']);
-        }
-
-        // 2. Crear el evento en la DB (sin la ruta de la imagen)
-        $eventos = Eventos::create($validator_datos);
-        $idEventoCreado = $eventos->id;
-        // 3. Procesar y guardar la imagen dentro de la carpeta 'eventos/{slug}'
-        if ($imagen_file) {
-            $file = $imagen_file;
-            $titulo = $eventos->titulo;
-
-            // Generar la subcarpeta
-            $carpeta_evento = Str::slug($titulo);
-            $extension = $file->getClientOriginalExtension();
-
-            // Nombre de archivo: [slug]-[id].[ext]
-            $nombre_archivo = $carpeta_evento . '-' . $eventos->id . '.' . $extension;
-
-            //Prefijamos la carpeta dinámica con 'eventos/'
-            $ruta_relativa = Storage::disk('public')->putFileAs(
-                'eventos/' . $carpeta_evento, // DIRECTORIO FINAL: eventos/titanic
-                $file,
-                $nombre_archivo
-            );
-
-            // 4. Actualizar el registro del evento con la ruta pública
-            $eventos->imagen = Storage::url($ruta_relativa);
-            $eventos->save();
-            $eventos->refresh();
-        }
-
-
-        for ($i = 1; $i <= 7; $i++) {
-            if ($i === 1) {
-                preciosEvento::create([
-                    "evento_id" => $idEventoCreado,
-                    "ubicacion_id" => $i,
-                    "precio" => $request->precioGeneral
-                ]);
-            } else if ($i === 2 || $i === 3 || $i === 7) {
-                preciosEvento::create([
-                    "evento_id" => $idEventoCreado,
-                    "ubicacion_id" => $i,
-                    "precio" => $request->precioPrimerPiso
-                ]);
-            } else if ($i === 4 || $i === 5 || $i === 6) {
-                preciosEvento::create([
-                    "evento_id" => $idEventoCreado,
-                    "ubicacion_id" => $i,
-                    "precio" => $request->precioSugundoPiso
-                ]);
+            if (Eventos::where("fecha", $request->fecha)->exists()) {
+                return response()->json([
+                    "success" => false,
+                    "message" => "Ya existe un evento registrado en esta fecha."
+                ], 400);
             }
+
+            $validator_datos = $validacionParaEvento->validated();
+            $imagen_file = $request->file('imagen');
+
+            // 1. Separar el archivo de imagen de los datos para la creación inicial
+            if ($imagen_file) {
+                unset($validator_datos['imagen']);
+            }
+
+            // 2. Crear el evento en la DB (sin la ruta de la imagen)
+            $eventos = Eventos::create($validator_datos);
+            $idEventoCreado = $eventos->id;
+            // 3. Procesar y guardar la imagen dentro de la carpeta 'eventos/{slug}'
+            if ($imagen_file) {
+                $file = $imagen_file;
+                $titulo = $eventos->titulo;
+
+                // Generar la subcarpeta
+                $carpeta_evento = Str::slug($titulo);
+                $extension = $file->getClientOriginalExtension();
+
+                // Nombre de archivo: [slug]-[id].[ext]
+                $nombre_archivo = $carpeta_evento . '-' . $eventos->id . '.' . $extension;
+
+                //Prefijamos la carpeta dinámica con 'eventos/'
+                $ruta_relativa = Storage::disk('public')->putFileAs(
+                    'eventos/' . $carpeta_evento, // DIRECTORIO FINAL: eventos/titanic
+                    $file,
+                    $nombre_archivo
+                );
+
+                // 4. Actualizar el registro del evento con la ruta pública
+                $eventos->imagen = Storage::url($ruta_relativa);
+                $eventos->save();
+                $eventos->refresh();
+            }
+
+
+            for ($i = 1; $i <= 7; $i++) {
+                if ($i === 1) {
+                    preciosEvento::create([
+                        "evento_id" => $idEventoCreado,
+                        "ubicacion_id" => $i,
+                        "precio" => $request->precioGeneral
+                    ]);
+                } else if ($i === 2 || $i === 3 || $i === 7) {
+                    preciosEvento::create([
+                        "evento_id" => $idEventoCreado,
+                        "ubicacion_id" => $i,
+                        "precio" => $request->precioPrimerPiso
+                    ]);
+                } else if ($i === 4 || $i === 5 || $i === 6) {
+                    preciosEvento::create([
+                        "evento_id" => $idEventoCreado,
+                        "ubicacion_id" => $i,
+                        "precio" => $request->precioSugundoPiso
+                    ]);
+                }
+            }
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'success' => false,
+                'message' => "Error al crear la solicitud del evento " . $e->getMessage(),
+                'data' => $eventos
+            ], 200);
         }
 
         DB::commit();
