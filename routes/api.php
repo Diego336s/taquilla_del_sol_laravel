@@ -11,12 +11,23 @@ use App\Http\Controllers\AsientosController;
 use App\Http\Controllers\AsientosEventosController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CodigoVerificacionController;
+use App\Http\Controllers\StripeWebhookController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 // Route::get('/user', function (Request $request) {
 //     return $request->user();
 // })->middleware('auth:sanctum');
+
+//Comando para instalador de pagos
+//composer require stripe/stripe-php
+
+// Comando para la url del servidor
+// npm install -g cloudflared
+// cloudflared tunnel --url http://localhost:8000
+
+
+
 
 
 
@@ -93,6 +104,7 @@ Route::put("actualizarCategoria/{id}", [CategoriasController::class, "update"]);
 Route::delete("eliminarCategoria/{id}", [CategoriasController::class, "destroy"]);
 
 //Eventos
+Route::get("evento/{id}", [EventosController::class, "evento"]);
 Route::get("listarEventos", [EventosController::class, "index"]);
 Route::get("eventos/disponibles", [EventosController::class, "eventosDisponibles"]);
 Route::post("registrarEventos", [EventosController::class, "store"]);
@@ -112,6 +124,9 @@ Route::get("listarPagos", [PagosController::class, "index"]);
 Route::post("registrarPagos", [PagosController::class, "store"]);
 Route::put("actualizarPagos/{id}", [PagosController::class, "update"]);
 Route::delete("eliminarPagos/{id}", [PagosController::class, "destroy"]);
+Route::post('/pago/stripe', [PagosController::class, 'crearSesionPago']);
+Route::post('/stripe/webhook', [StripeWebhookController::class, 'handle']);
+
 
 //Asientos
 Route::get("asientos/evento/{id}", [AsientosEventosController::class, "asientosPorEventento"]);
