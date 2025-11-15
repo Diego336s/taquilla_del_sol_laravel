@@ -327,6 +327,22 @@ class EventosController extends Controller
         ], 200);
     }
 
+public function eventosPorEmpresa($id)
+{
+    $eventos = Eventos::where("empresa_id", $id)->get();
+
+    if ($eventos->isEmpty()) {
+        return response()->json([
+            "success" => false,
+            "message" => "No hay eventos para esta empresa."
+        ], 404);
+    }
+
+    return response()->json([
+        "success" => true,
+        "eventos" => $eventos
+    ], 200);
+}
 
     public function show(string $id)
     {

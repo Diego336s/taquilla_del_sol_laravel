@@ -11,8 +11,6 @@ use Illuminate\Support\Facades\Validator;
 
 class ClientesController extends Controller
 {
-
-
     public function me(Request $request)
     {
         return response()->json([
@@ -21,10 +19,15 @@ class ClientesController extends Controller
         ]);
     }
 
+    // 🔥 AHORA DEVUELVE EL FORMATO CORRECTO PARA EL FRONTEND
     public function index()
     {
         $clientes = clientes::all();
-        return response()->json($clientes);
+
+        return response()->json([
+            "success" => true,
+            "clientes" => $clientes
+        ]);
     }
 
     public function store(Request $request)
@@ -40,7 +43,6 @@ class ClientesController extends Controller
             "clave" => "required|string|min:6"
         ]);
 
-
         if ($validator_datos->fails()) {
             return response()->json([
                 "success" => false,
@@ -48,13 +50,15 @@ class ClientesController extends Controller
             ], 400);
         }
 
+        // Validación de correo único en todas las tablas
         $correoExistenteCliente = clientes::where("correo", $request->correo)->exists();
         $correoExistenteEmpresa = Empresas::where("correo", $request->correo)->exists();
         $correoExistenteAdministradores = Administradores::where("correo", $request->correo)->exists();
+
         if ($correoExistenteAdministradores || $correoExistenteCliente || $correoExistenteEmpresa) {
             return response()->json([
                 "success" => false,
-                "message" => "Correo $request->correo ya se encuetra registrado."
+                "message" => "Correo $request->correo ya se encuentra registrado."
             ]);
         }
 
@@ -68,7 +72,9 @@ class ClientesController extends Controller
             "correo" => $request->correo,
             "clave" => Hash::make($request->clave)
         ]);
+
         $token = $cliente->createToken("auth_token", ["Cliente"])->plainTextToken;
+
         return response()->json([
             "success" => true,
             "message" => "Cliente $request->nombre registrado correctamente",
@@ -78,16 +84,21 @@ class ClientesController extends Controller
         ], 200);
     }
 
-    public function show(string $id)
+    public function show($id)
     {
-        $cliente = clientes::find($id);
+        $cliente = Clientes::find($id);
+
         if (!$cliente) {
             return response()->json([
                 "success" => false,
-                "message" => "Cliente no encontrado"
+                "message" => "Cliente no encontrado",
             ], 404);
         }
-        return response()->json($cliente, 200);
+
+        return response()->json([
+            "success" => true,
+            "data" => $cliente
+        ], 200);
     }
 
     public function updateCliente(Request $request, string $id)
@@ -118,27 +129,28 @@ class ClientesController extends Controller
             ], 400);
         }
 
-        // ✅ Actualizar solo los campos validados
         $cliente->update($validator->validated());
 
         return response()->json([
             "success" => true,
-            "message" => "Perfil de $request->nombre $request->apellido actualizado correctamente",
+            "message" => "Perfil actualizado correctamente",
             "cliente" => $cliente
         ], 200);
     }
 
-
     public function destroy(string $id)
     {
         $cliente = clientes::find($id);
+
         if (!$cliente) {
             return response()->json([
                 "success" => false,
                 "message" => "Cliente no encontrado"
             ], 404);
         }
+
         $cliente->delete();
+
         return response()->json([
             "success" => true,
             "message" => "Cliente eliminado correctamente"
@@ -148,6 +160,7 @@ class ClientesController extends Controller
     public function cambiarClave(Request $request, string $id)
     {
         $cliente = clientes::find($id);
+
         if (!$cliente) {
             return response()->json([
                 "success" => false,
@@ -162,12 +175,12 @@ class ClientesController extends Controller
         if ($validator_clave->fails()) {
             return response()->json([
                 "success" => false,
-                "message" => "Error de validaciones en el servidor",
+                "message" => "Error de validaciones",
                 "error" => $validator_clave->errors()
             ], 400);
-        };
+        }
 
-          if (Hash::check($request->clave, $cliente->clave)) {
+        if (Hash::check($request->clave, $cliente->clave)) {
             return response()->json([
                 "success" => false,
                 "message" => "La contraseña debe ser diferente a la actual.",
@@ -177,14 +190,15 @@ class ClientesController extends Controller
         $cliente->update([
             "clave" => Hash::make($request->clave)
         ]);
-         $user = $request->user();
+
+        $user = $request->user();
         if ($user && $user->currentAccessToken()) {
             $user->currentAccessToken()->delete();
         }
+
         return response()->json([
             "success" => true,
-            "message" => "Clave cambiada exitosamente. Inicia sesion nuevamente.",
-            $cliente
+            "message" => "Clave cambiada exitosamente. Inicia sesión nuevamente."
         ], 200);
     }
 
@@ -203,13 +217,6 @@ class ClientesController extends Controller
         }
 
         $cliente = clientes::where("correo", $request->correo)->first();
-
-        if (!$cliente) {
-            return response()->json([
-                "success" => false,
-                "message" => "No encontramos tu cuenta",
-            ]);
-        }
 
         if (!$cliente || !Hash::check($request->clave, $cliente->clave)) {
             return response()->json([
@@ -248,7 +255,6 @@ class ClientesController extends Controller
         ]);
     }
 
-    //Restablecer clave cliente
     public function olvideMiClave(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -263,18 +269,16 @@ class ClientesController extends Controller
             ], 400);
         }
 
-        // Buscar cliente por correo
-        $clientes = clientes::where("correo", $request->correo)->first();
+        $cliente = clientes::where("correo", $request->correo)->first();
 
-        if (!$clientes) {
+        if (!$cliente) {
             return response()->json([
                 "success" => false,
                 "message" => "No se encontró un cliente con ese correo"
             ], 404);
         }
 
-        // Actualizar clave
-        $clientes->update([
+        $cliente->update([
             "clave" => Hash::make($request->clave)
         ]);
 
@@ -284,12 +288,12 @@ class ClientesController extends Controller
         ], 200);
     }
 
-
     public function cambiarCorreo(Request $request, string $id)
     {
         $cliente = clientes::find($id);
+
         if (!$cliente) {
-            return response()->json(["menssge" => "Cliente no encontrado"]);
+            return response()->json(["message" => "Cliente no encontrado"]);
         }
 
         $validator = Validator::make($request->all(), [
@@ -314,20 +318,16 @@ class ClientesController extends Controller
             ]);
         }
 
-
-
-
-
-
         $cliente->update($validator->validated());
+
         $user = $request->user();
         if ($user && $user->currentAccessToken()) {
             $user->currentAccessToken()->delete();
         }
+
         return response()->json([
             "success" => true,
-            "message" => "Cambio del correo exitoso. Inicia sesion nuevamente."
-
+            "message" => "Correo actualizado, inicia sesión nuevamente."
         ], 200);
     }
 }
