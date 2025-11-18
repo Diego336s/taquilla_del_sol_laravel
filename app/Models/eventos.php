@@ -39,6 +39,10 @@ class Eventos extends Model
     {
         return $this->belongsToMany(preciosEvento::class, "evento_id", "id");
     }
+    protected $casts = [
+        'fecha_evento' => 'date',
+
+    ];
 
     protected function imagen(): Attribute
     {

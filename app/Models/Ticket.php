@@ -27,5 +27,10 @@ class Ticket extends Model
         return $this->belongsToMany(reservaAsientos::class, 'ticket_id');
     }
 
+    protected $casts = [
+    'fecha_compra' => 'datetime',
+];
+
+
     
 }

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\asientosEventos;
 use Illuminate\Http\Request;
 use Stripe\Stripe;
 use Stripe\Webhook;
@@ -32,6 +33,20 @@ class StripeWebhookController extends Controller
 
                 // ✅ Aquí actualizas tu base de datos (ejemplo)
                 Log::info('✅ Pago completado', ['session' => $session->id]);
+                $asientos = explode(',', $session->metadata->asientos);
+                $id_evento = $session->metadata->id_evento;
+                $total = $session->metadata->total;
+
+                $asientosReservados = array_filter(array_map('trim', $asientos));
+
+                foreach ($asientosReservados as $asiento) {
+                    $id = intval($asiento);
+                    if ($id > 0) {
+                        asientosEventos::where("id", $id)->update([
+                            "disponible" => false
+                        ]);
+                    }
+                }
 
                 break;
 

@@ -77,7 +77,6 @@ Route::middleware(["auth:sanctum"])->group(function () {
 });
 
 //Clientes
-
 Route::get("listarClientes", [ClientesController::class, "index"]);
 Route::get("verCliente/{id}", [ClientesController::class, "show"]);
 Route::delete("eliminarCliente/{id}", [ClientesController::class, "destroy"]);
@@ -125,6 +124,8 @@ Route::post("registrarPagos", [PagosController::class, "store"]);
 Route::put("actualizarPagos/{id}", [PagosController::class, "update"]);
 Route::delete("eliminarPagos/{id}", [PagosController::class, "destroy"]);
 Route::post('/pago/stripe', [PagosController::class, 'crearSesionPago']);
+Route::get('/pago-exitoso/{idsAsientos}/{idCliente}/{total}/{idEvento}', [PagosController::class, 'pagoExitoso']);
+Route::get('/informacion/ticket/{id}', [TicketController::class, 'informacionTicket']);
 Route::post('/stripe/webhook', [StripeWebhookController::class, 'handle']);
 
 
