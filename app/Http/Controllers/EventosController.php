@@ -482,104 +482,82 @@ public function eventosPorEmpresa($id)
         return response()->json(['message' => 'Evento eliminado correctamente']);
     }
 
-    
-    public function proximaFuncion($id)
-    {
-        $data = DB::table('tickets')
+  public function proximaFuncion($idCliente)
+{
+    $hoy = now()->toDateString();
 
-            // Cliente
-            ->join('clientes', 'clientes.id', '=', 'tickets.cliente_id')
+    // 1️⃣ Obtener el evento más próximo del cliente
+    $evento = DB::table('clientes')
+        ->join('tickets', 'tickets.cliente_id', '=', 'clientes.id')
+        ->join('eventos', 'eventos.id', '=', 'tickets.evento_id')
+        ->where('clientes.id', $idCliente)
+        ->whereDate('eventos.fecha', '>=', $hoy)
+        ->orderBy('eventos.fecha', 'asc')
+        ->select(
+            'eventos.id as evento_id',
+            'eventos.titulo',
+            'eventos.fecha as fecha_evento',
+            'eventos.hora_inicio',
+            'eventos.hora_final'
+        )
+        ->first();
 
-            // TABLA RESERVAS (la clave importante)
-            ->join('reserva_asientos', 'reserva_asientos.ticket_id', '=', 'tickets.id')
-
-            // Asientos del evento reservados
-            ->join('asientos_eventos', 'asientos_eventos.id', '=', 'reserva_asientos.asiento_evento_id')
-
-            // Información del asiento
-            ->join('asientos', 'asientos.id', '=', 'asientos_eventos.asiento_id')
-
-            // Ubicación del asiento (VIP, General, Palco, etc)
-            ->join('ubicacion_asientos', 'ubicacion_asientos.id', '=', 'asientos.ubicacion_id')
-
-            // Precios asociados al asiento para ese evento
-            ->join('precios_eventos', 'precios_eventos.id', '=', 'asientos_eventos.precio_id')
-            //Evento asociado al ticket
-            ->join("eventos", "eventos.id", "=", "tickets.evento_id")
-            ->select(
-                // TICKET
-                'tickets.id as ticket_id',
-                'tickets.precio as total_pagado',
-                'tickets.fecha_compra',
-                'tickets.estado',
-
-                //Evento
-                "eventos.titulo",
-                "eventos.fecha as fecha_evento",
-                "eventos.hora_inicio",
-                "eventos.hora_final",
-
-                // CLIENTE
-                'clientes.nombre',
-                'clientes.apellido',
-                'clientes.correo',
-                'clientes.documento',
-                'clientes.telefono',
-
-                // ASIENTO
-                'asientos.fila',
-                'asientos.numero',
-
-                // UBICACION
-                'ubicacion_asientos.ubicacion',
-
-                // PRECIO UNITARIO
-                'precios_eventos.precio as precio_asiento'
-            )
-            ->where('cliente', $id)
-            ->get();
-
-        if ($data->isEmpty()) {
-            return response()->json([
-                "success" => false,
-                "message" => "El ticket no existe"
-            ], 404);
-        }
-
-        // --- AGRUPAR ---
-        $ticket = $data->first();
-
-        $asientos = $data->map(function ($item) {
-            return [
-                "fila" => $item->fila,
-                "numero" => $item->numero,
-                "ubicacion" => $item->ubicacion,
-                "precio" => $item->precio_asiento,
-            ];
-        });
-
+    if (!$evento) {
         return response()->json([
-            "success" => true,
-            "ticket" => [
-                "ticket_id"     => $ticket->ticket_id,
-                "total_pagado"  => $ticket->total_pagado,
-                "fecha_compra"  => $ticket->fecha_compra,
-                "estado"        => $ticket->estado,
-                "evento" => [
-                    "titulo" => $ticket->titulo,
-                    "fecha_evento" => $ticket->fecha_evento,
-                    "hora_inicio" => $ticket->hora_inicio,
-                    "hora_final" => $ticket->hora_final,
-                ],
-                "cliente" => [
-                    "nombre"     => $ticket->nombre,
-                    "apellido"   => $ticket->apellido,
-                    "correo"     => $ticket->correo,
-                    "documento"  => $ticket->documento,
-                    "telefono"   => $ticket->telefono,
-                ],
-                "asientos"      => $asientos
-            ]
+            "success" => false,
+            "message" => "No tienes funciones próximas"
         ]);
     }
+
+    // 2️⃣ Obtener TODOS los tickets del cliente para ese evento
+    $tickets = DB::table('tickets')
+        ->where('cliente_id', $idCliente)
+        ->where('evento_id',  $evento->evento_id)
+        ->get();
+
+    $idsTickets = $tickets->pluck('id')->toArray();
+
+    // 3️⃣ Obtener todos los asientos reservados en esos tickets
+    $asientos = DB::table('reserva_asientos')
+        ->join('asientos_eventos', 'asientos_eventos.id', '=', 'reserva_asientos.asiento_evento_id')
+        ->join('asientos', 'asientos.id', '=', 'asientos_eventos.asiento_id')
+        ->join('ubicacion_asientos', 'ubicacion_asientos.id', '=', 'asientos.ubicacion_id')
+        ->join('precios_eventos', 'precios_eventos.id', '=', 'asientos_eventos.precio_id')
+        ->whereIn('reserva_asientos.ticket_id', $idsTickets)
+        ->orderBy('asientos.fila')
+        ->orderBy('asientos.numero')
+        ->select(
+            'asientos.fila',
+            'asientos.numero',
+            'ubicacion_asientos.ubicacion',
+            'precios_eventos.precio as precio_asiento'
+        )
+        ->get();
+
+    // 4️⃣ Obtener datos del cliente (una sola vez)
+    $cliente = DB::table('clientes')->where('id', $idCliente)->first();
+
+    return response()->json([
+        "success" => true,
+        "proxima_funcion" => [
+            "evento" => [
+                "titulo"       => $evento->titulo,
+                "fecha_evento" => $evento->fecha_evento,
+                "hora_inicio"  => $evento->hora_inicio,
+                "hora_final"   => $evento->hora_final,
+            ],
+            "cliente" => [
+                "nombre"     => $cliente->nombre,
+                "apellido"   => $cliente->apellido,
+                "correo"     => $cliente->correo,
+                "documento"  => $cliente->documento,
+                "telefono"   => $cliente->telefono,
+            ],
+            "tickets" => $tickets,         // TODOS los tickets del evento
+            "asientos" => $asientos         // TODOS los asientos asignados
+        ]
+    ]);
+}
+
+
 }

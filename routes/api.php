@@ -110,7 +110,7 @@ Route::post("registrarEventos", [EventosController::class, "store"]);
 Route::put("actualizarEventos/{id}", [EventosController::class, "update"]);
 Route::delete("eliminarEventos/{id}", [EventosController::class, "destroy"]);
 Route::post("cambiar/estado/evento/{id}", [EventosController::class, "cambioDeEstadoDelEvento"]);
-
+Route::get("proxima-funcion/{id}", [EventosController::class, "proximaFuncion"]);
 
 //Tickets
 Route::get("listarTickets", [TicketController::class, "index"]);
