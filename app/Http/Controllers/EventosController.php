@@ -80,6 +80,13 @@ class EventosController extends Controller
                 ], 400);
             }
 
+            if($evento->estado === "activo"){
+              DB::rollBack();
+                return response()->json([
+                    "success" => false,
+                    'message' => 'El evento ya esta activo.'
+                ], 400);
+            }
 
 
             if ($request->estado === "activo") {
@@ -556,6 +563,40 @@ public function eventosPorEmpresa($id)
             "tickets" => $tickets,         // TODOS los tickets del evento
             "asientos" => $asientos         // TODOS los asientos asignados
         ]
+    ]);
+}
+
+public function contarFuncionesProximas($idCliente)
+{
+    $hoy = now()->toDateString(); // Fecha actual
+
+    $cantidad = DB::table('tickets')
+        ->join('eventos', 'eventos.id', '=', 'tickets.evento_id')
+        ->where('tickets.cliente_id', $idCliente)
+        ->whereDate('eventos.fecha', '>=', $hoy)
+        ->distinct('tickets.evento_id') // <<< SOLO UN EVENTO ÚNICO
+        ->count('tickets.evento_id');
+
+    return response()->json([
+        "success" => true,
+        "proximas_funciones" => $cantidad
+    ]);
+}
+
+public function contarFuncionesVistas($idCliente)
+{
+    $hoy = now()->toDateString(); // Fecha actual
+
+    $cantidad = DB::table('tickets')
+        ->join('eventos', 'eventos.id', '=', 'tickets.evento_id')
+        ->where('tickets.cliente_id', $idCliente)
+        ->whereDate('eventos.fecha', '<', $hoy) // FECHA PASADA = función vista
+        ->distinct('tickets.evento_id')         // NO duplicar
+        ->count('tickets.evento_id');
+
+    return response()->json([
+        "success" => true,
+        "funciones_vistas" => $cantidad
     ]);
 }
 

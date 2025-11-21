@@ -16,7 +16,13 @@ class AdministradoresController extends Controller
         $administradores = Administradores::all();
         return response()->json($administradores);
     }
-
+ public function me(Request $request)
+    {
+        return response()->json([
+            "success" => true,
+            "user" => $request->user()
+        ]);
+    }
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -222,5 +228,64 @@ class AdministradoresController extends Controller
             "success" => true,
             "message" => "Cambio de clave exitoso"
         ], 200);
+    }
+
+    public function loginCompartidoAdminCliente(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            "correo" => "required|email",
+            "clave" => "required|string"
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                "success" => false,
+                "message" => "Error en validaciones.",
+                "error" => $validator->errors()
+            ]);
+        }
+
+        // Buscar admin y cliente
+        $admin = Administradores::where("correo", $request->correo)->first();
+        $cliente = Clientes::where("correo", $request->correo)->first();
+
+        if (!$admin && !$cliente) {
+            return response()->json([
+                "success" => false,
+                "message" => "No encontramos tu cuenta",
+            ]);
+        }
+
+        // Validar contraseña según el tipo encontrado
+        if ($admin && Hash::check($request->clave, $admin->clave)) {
+
+            $token = $admin->createToken("auth_token", ["Admin"])->plainTextToken;
+
+            return response()->json([
+                "success" => true,
+                "message" => "Inicio de sesión exitoso",
+                "token" => $token,
+                "token_type" => "Bearer",
+                "rol" => "Admin"
+            ]);
+        }
+
+        if ($cliente && Hash::check($request->clave, $cliente->clave)) {
+
+            $token = $cliente->createToken("auth_token", ["Cliente"])->plainTextToken;
+
+            return response()->json([
+                "success" => true,
+                "message" => "Inicio de sesión exitoso",
+                "token" => $token,
+                "token_type" => "Bearer",
+                "rol" => "Cliente"
+            ]);
+        }
+
+        return response()->json([
+            "success" => false,
+            "message" => "Contraseña incorrecta",
+        ]);
     }
 }

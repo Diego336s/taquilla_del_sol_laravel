@@ -231,6 +231,7 @@ class PagosController extends Controller
                 'cliente_id' => $idClientes,
                 'precio' => $total,
                 'estado' => "comprado",
+                "usado" => false,
                 'fecha_compra' => now(),
             ]);
 

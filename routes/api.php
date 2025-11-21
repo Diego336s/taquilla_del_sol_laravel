@@ -36,8 +36,10 @@ use Illuminate\Support\Facades\Route;
 Route::post("registrar/cliente", [ClientesController::class, "store"]);
 
 //** ----- LOGIN ----- */
+
 Route::post("login/empresa", [EmpresasController::class, "login"]);
 Route::post("login/cliente", [ClientesController::class, "login"]);
+Route::post("login/admin-cliente", [AdministradoresController::class, "loginCompartidoAdminCliente"]);
 Route::post("login/admin", [AdministradoresController::class, "login"]);
 Route::post('envio/codigo/verificacion', [CodigoVerificacionController::class, 'enviarCodigo']);
 Route::post('verificar/codigo', [CodigoVerificacionController::class, 'verificarCodigo']);
@@ -61,7 +63,7 @@ Route::middleware(["auth:sanctum"])->group(function () {
 
 
 Route::middleware(["auth:sanctum"])->group(function () {
-    //Acesso Clientes
+    //Acesso Empresa
     Route::middleware("abilities:Empresa")->group(function () {
         Route::get("me/Empresa", [EmpresasController::class, "me"]);
         Route::post("logout/empresa", [EmpresasController::class, "logout"]);
@@ -69,7 +71,7 @@ Route::middleware(["auth:sanctum"])->group(function () {
 });
 
 Route::middleware(["auth:sanctum"])->group(function () {
-    //Acesso Clientes
+    //Acesso Admin
     Route::middleware("abilities:Admin")->group(function () {
         Route::get("me/administrador", [AdministradoresController::class, "me"]);
         Route::post("logout/admin", [AdministradoresController::class, "logout"]);
@@ -95,6 +97,8 @@ Route::get("empresa/{id}", [EmpresasController::class, "show"]);
 Route::put("actualizarEmpresa/{id}", [EmpresasController::class, "update"]);
 Route::delete("eliminarEmpresa/{id}", [EmpresasController::class, "destroy"]);
 Route::put("cambiarClave/{id}", [EmpresasController::class, "cambiarClave"]);
+Route::put("cambiar/correo/empresa/{id}", [EmpresasController::class, "cambiarCorreo"]);
+
 
 //Categorias
 Route::get("listarCategorias", [CategoriasController::class, "index"]);
@@ -111,12 +115,15 @@ Route::put("actualizarEventos/{id}", [EventosController::class, "update"]);
 Route::delete("eliminarEventos/{id}", [EventosController::class, "destroy"]);
 Route::post("cambiar/estado/evento/{id}", [EventosController::class, "cambioDeEstadoDelEvento"]);
 Route::get("proxima-funcion/{id}", [EventosController::class, "proximaFuncion"]);
+Route::get("contador/proxima-funcion/{id}", [EventosController::class, "contarFuncionesProximas"]);
+Route::get("contador/funciones-vistas/{id}", [EventosController::class, "contarFuncionesVistas"]);
 
 //Tickets
 Route::get("listarTickets", [TicketController::class, "index"]);
 Route::post("registrarTickets", [TicketController::class, "store"]);
 Route::put("actualizarTickets/{id}", [TicketController::class, "update"]);
 Route::delete("eliminarTickets/{id}", [TicketController::class, "destroy"]);
+Route::post("/verificador-ticket", [TicketController::class, "verificarUsoTickect"]);
 
 //Pagos
 Route::get("listarPagos", [PagosController::class, "index"]);

@@ -80,6 +80,7 @@ class ClientesController extends Controller
             "message" => "Cliente $request->nombre registrado correctamente",
             "user" => $cliente,
             "token_access" => $token,
+            "rol" => "Cliente",
             "token_type" => "Bearer"
         ], 200);
     }
