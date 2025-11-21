@@ -11,6 +11,7 @@ class Ticket extends Model
         'cliente_id',
         'precio',
         'estado',
+        "usado",
         'fecha_compra',
     ];
     public function pago()
@@ -28,9 +29,7 @@ class Ticket extends Model
     }
 
     protected $casts = [
-    'fecha_compra' => 'datetime',
-];
-
-
-    
+        'fecha_compra' => 'datetime',
+        'usado' => 'boolean',
+    ];
 }

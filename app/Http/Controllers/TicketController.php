@@ -189,4 +189,49 @@ class TicketController extends Controller
             ]
         ]);
     }
+
+    public function verificarUsoTickect(Request $request)
+    {
+        // Validación
+        $validator = Validator::make($request->all(), [
+            'ticket_id' => 'required|integer|exists:tickets,id',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                "success" => false,
+                "message" => "Error de validación",
+                "errors"  => $validator->errors()
+            ]);
+        }
+
+
+        $id = $request->ticket_id;
+        $ticket = Ticket::find($id);
+        if (!$ticket) {
+            return response()->json([
+                "success" => false,
+                "message" => "Ticket no encontrado."
+            ]);
+        }
+
+        // Revisar si ya fue usado
+        if ($ticket->usado === true) {
+            return response()->json([
+                "success" => false,
+                "message" => "Este ticket ya ha sido usado."
+            ]);
+        }
+
+        // Marcar como usado
+        $ticket->update([
+            "usado" => true
+        ]);
+
+        return response()->json([
+            "success" => true,
+            "message" => "🎭 Ticket válido. ¡Bienvenido al Teatro del Sol!",
+            "ticket" => $ticket
+        ]);
+    }
 }

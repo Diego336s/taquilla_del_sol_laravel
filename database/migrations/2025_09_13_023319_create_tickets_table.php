@@ -18,6 +18,7 @@ return new class extends Migration
             $table->decimal("precio", 8,2);
             $table->enum("estado",["pendiente","comprado","cancelado"]);
             $table->dateTime("fecha_compra");
+            $table->boolean('usado')->default(false);
             $table->timestamps();
         });
     }

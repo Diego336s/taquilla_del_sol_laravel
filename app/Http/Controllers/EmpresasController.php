@@ -131,17 +131,49 @@ class EmpresasController extends Controller
         return response()->json($empresa, 200);
     }
 
-    public function cambioClave(Request $request, string $id)
+   public function cambiarClave(Request $request, string $id)
     {
-        $empresa = Empresas::findOrFail($id);
-        $validated = $request->validate([
-            'clave' => 'required|string|max:6',
+        $empresa = Empresas::find($id);
+
+        if (!$empresa) {
+            return response()->json([
+                "success" => false,
+                "message" => "Cliente no encontrado"
+            ], 404);
+        }
+
+        $validator_clave = Validator::make($request->all(), [
+            "clave" => "required|string|min:6"
         ]);
 
-        // Encriptar la clave
-        $validated['clave'] = Hash::make($validated['clave']);
-        $empresa->update($validated);
-        return response()->json(['message' => 'Clave actualizada correctamente'], 200);
+        if ($validator_clave->fails()) {
+            return response()->json([
+                "success" => false,
+                "message" => "Error de validaciones",
+                "error" => $validator_clave->errors()
+            ], 400);
+        }
+
+        if (Hash::check($request->clave, $empresa->clave)) {
+            return response()->json([
+                "success" => false,
+                "message" => "La contraseña debe ser diferente a la actual.",
+            ]);
+        }
+
+        $empresa->update([
+            "clave" => Hash::make($request->clave)
+        ]);
+
+        $user = $request->user();
+        if ($user && $user->currentAccessToken()) {
+            $user->currentAccessToken()->delete();
+        }
+
+        return response()->json([
+            "success" => true,
+            "message" => "Clave cambiada exitosamente. Inicia sesión nuevamente."
+        ], 200);
     }
 
 
@@ -240,6 +272,49 @@ class EmpresasController extends Controller
         return response()->json([
             "success" => true,
             "message" => "Cambio de clave exitoso"
+        ], 200);
+    }
+    
+     public function cambiarCorreo(Request $request, string $id)
+    {
+        $empresa = Empresas::find($id);
+
+        if (!$empresa) {
+            return response()->json(["message" => "Cliente no encontrado"]);
+        }
+
+        $validator = Validator::make($request->all(), [
+            "correo" => "required|string|email"
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                "success" => false,
+                "message" => $validator->errors()
+            ], 400);
+        }
+
+        $correoExistenteCliente = clientes::where("correo", $request->correo)->exists();
+        $correoExistenteAdmin = Administradores::where("correo", $request->correo)->exists();
+        $correoExistenteEmpresa = Empresas::where("correo", $request->correo)->exists();
+
+        if ($correoExistenteAdmin || $correoExistenteEmpresa || $correoExistenteCliente) {
+            return response()->json([
+                "success" => false,
+                "message" => "El correo $request->correo ya se encuentra registrado"
+            ]);
+        }
+
+        $empresa->update($validator->validated());
+
+        $user = $request->user();
+        if ($user && $user->currentAccessToken()) {
+            $user->currentAccessToken()->delete();
+        }
+
+        return response()->json([
+            "success" => true,
+            "message" => "Correo actualizado, inicia sesión nuevamente."
         ], 200);
     }
 }

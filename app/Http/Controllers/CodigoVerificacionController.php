@@ -8,9 +8,7 @@ use App\Mail\NotificacionUsuario;
 use App\Models\administradores;
 use App\Models\clientes;
 use App\Models\Empresas;
-use App\Models\medicos;
-use App\Models\pacientes;
-use App\Models\recepcionistas;
+
 use Illuminate\Support\Facades\Mail;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Validator;
