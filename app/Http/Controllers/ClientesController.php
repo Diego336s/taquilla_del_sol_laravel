@@ -207,6 +207,9 @@ class ClientesController extends Controller
         $validator = Validator::make($request->all(), [
             "correo" => "required|email",
             "clave" => "required|string"
+        ], [
+            "correo.required" => "El correo es obligatorio",
+            "correo.email"    => "El correo debe ser válido",
         ]);
 
         if ($validator->fails()) {
