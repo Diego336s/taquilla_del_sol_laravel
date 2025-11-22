@@ -269,9 +269,9 @@ class PagosController extends Controller
             $id_evento = $request->id_evento;
             $total = $request->input('total');
             $asientosIncriptados = rtrim(strtr(base64_encode(gzcompress(json_encode($asientosReservados))), '+/', '-_'), '=');
-            $idClientesEncriptado = rtrim(strtr(base64_encode(gzcompress(json_encode($id_usario))), '+/', '-_'), '=');
-            $idEventoEncriptado = rtrim(strtr(base64_encode(gzcompress(json_encode($id_evento))), '+/', '-_'), '=');
-            $totalEncriptado = rtrim(strtr(base64_encode(gzcompress(json_encode($total))), '+/', '-_'), '=');
+            $id_usarioIncriptado = rtrim(strtr(base64_encode(gzcompress(json_encode($id_usario))), '+/', '-_'), '=');
+            $id_eventoIncriptado = rtrim(strtr(base64_encode(gzcompress(json_encode($id_evento))), '+/', '-_'), '=');
+            $totalIncriptados = rtrim(strtr(base64_encode(gzcompress(json_encode($total))), '+/', '-_'), '=');
 
             // Crear sesión de Stripe
             $session = Session::create([
@@ -290,13 +290,12 @@ class PagosController extends Controller
                 'mode' => 'payment',
 
                 // Enviar los IDs de asientos como query params
-                env('FRONTEND_URL') .
-                "/index.php?ruta=pago_exitoso" .
-                "&asientos=" . urlencode($asientosIncriptados) .
-                "&cliente=" . urlencode($idClientesEncriptado) .
-                "&total=" . urlencode($totalEncriptado) .
-                "&evento=" . urlencode($idEventoEncriptado),
-
+                'success_url' => env('FRONTEND_URL') 
+    . "/index.php?ruta=pago_exitoso"
+    . "?asientos=$asientosIncriptados"
+    . "&cliente=$id_usarioIncriptado"
+    . "&total=$totalIncriptados"
+    . "&evento=$id_eventoIncriptado",
 
 
 
