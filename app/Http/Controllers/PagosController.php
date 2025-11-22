@@ -451,4 +451,149 @@ class PagosController extends Controller
             ], 400);
         }
     }
+
+    
+   public function pagoExitosoWeb(Request $request)
+{
+    DB::beginTransaction();
+
+    // Leer parámetros GET
+    $asientosIncriptados   = $request->query("asientos");
+    $idClientesEncriptado  = $request->query("cliente");
+    $totalEncriptado       = $request->query("total");
+    $idEventoEncriptado    = $request->query("evento");
+
+    if (!$asientosIncriptados || !$idClientesEncriptado || !$totalEncriptado || !$idEventoEncriptado) {
+        return response()->json([
+            "success" => false,
+            "message" => "Faltan parámetros en la URL"
+        ], 400);
+    }
+
+    // Función para desencriptar
+    $decode = function ($data) {
+        return json_decode(gzuncompress(base64_decode(strtr($data, '-_', '+/'))), true);
+    };
+
+    $asientos = $decode($asientosIncriptados);
+    $idCliente = $decode($idClientesEncriptado);
+    $total = $decode($totalEncriptado);
+    $idEvento = $decode($idEventoEncriptado);
+
+    if (!is_array($asientos) || empty($asientos)) {
+        DB::rollBack();
+        return response()->json([
+            "success" => false,
+            "message" => "Los asientos no son válidos"
+        ], 400);
+    }
+
+    try {
+
+        // Crear ticket
+        $ticket = Ticket::create([
+            'evento_id' => $idEvento,
+            'cliente_id' => $idCliente,
+            'precio' => $total,
+            'estado' => "comprado",
+            "usado" => false,
+            'fecha_compra' => now(),
+        ]);
+
+        if (!$ticket) {
+            DB::rollBack();
+            return response()->json([
+                "success" => false,
+                "message" => "No se pudo crear el ticket"
+            ]);
+        }
+
+        // Actualizar asientos
+        foreach ($asientos as $asientoId) {
+            $id = intval($asientoId);
+
+            asientosEventos::where("id", $id)->update([
+                "disponible" => false
+            ]);
+
+            reservaAsientos::create([
+                "ticket_id" => $ticket->id,
+                "asiento_evento_id" => $id
+            ]);
+        }
+
+        // Obtener información del ticket
+        $data = DB::table('tickets')
+
+            ->join('clientes', 'clientes.id', '=', 'tickets.cliente_id')
+            ->join('reserva_asientos', 'reserva_asientos.ticket_id', '=', 'tickets.id')
+            ->join('asientos_eventos', 'asientos_eventos.id', '=', 'reserva_asientos.asiento_evento_id')
+            ->join('asientos', 'asientos.id', '=', 'asientos_eventos.asiento_id')
+            ->join('ubicacion_asientos', 'ubicacion_asientos.id', '=', 'asientos.ubicacion_id')
+            ->join('precios_eventos', 'precios_eventos.id', '=', 'asientos_eventos.precio_id')
+            ->join("eventos", "eventos.id", "=", "tickets.evento_id")
+            ->select(
+                'tickets.id as ticket_id',
+                'tickets.precio as total_pagado',
+                'tickets.fecha_compra',
+                'tickets.estado',
+
+                "eventos.titulo",
+                "eventos.fecha as fecha_evento",
+                "eventos.hora_inicio",
+                "eventos.hora_final",
+
+                'clientes.nombre',
+                'clientes.apellido',
+                'clientes.correo',
+                'clientes.documento',
+                'clientes.telefono',
+
+                'asientos.fila',
+                'asientos.numero',
+
+                'ubicacion_asientos.ubicacion',
+                'precios_eventos.precio as precio_asiento'
+            )
+            ->where('tickets.id', $ticket->id)
+            ->get();
+
+        if ($data->isEmpty()) {
+            return response()->json([
+                "success" => false,
+                "message" => "El ticket no existe"
+            ], 404);
+        }
+
+        $infTicket = $data->first();
+
+        $asientosResponse = $data->map(function ($item) {
+            return [
+                "fila" => $item->fila,
+                "numero" => $item->numero,
+                "ubicacion" => $item->ubicacion,
+                "precio" => $item->precio_asiento,
+            ];
+        });
+
+        // Enviar correo
+        Mail::to($infTicket->correo)->send(new TicketUsuario($infTicket, $asientosResponse));
+
+        DB::commit();
+
+        return response()->json([
+            "success" => true,
+            "message" => "Pago registrado y ticket generado correctamente"
+        ]);
+    } catch (\Exception $e) {
+
+        DB::rollBack();
+
+        return response()->json([
+            "success" => false,
+            "message" => "Error: " . $e->getMessage()
+        ]);
+    }
+}
+
 }
