@@ -269,9 +269,9 @@ class PagosController extends Controller
             $id_evento = $request->id_evento;
             $total = $request->input('total');
             $asientosIncriptados = rtrim(strtr(base64_encode(gzcompress(json_encode($asientosReservados))), '+/', '-_'), '=');
-            $id_usarioIncriptado = rtrim(strtr(base64_encode(gzcompress(json_encode($id_usario))), '+/', '-_'), '=');
-            $id_eventoIncriptado = rtrim(strtr(base64_encode(gzcompress(json_encode($id_evento))), '+/', '-_'), '=');
-            $totalIncriptados = rtrim(strtr(base64_encode(gzcompress(json_encode($total))), '+/', '-_'), '=');
+            $idClientesEncriptado = rtrim(strtr(base64_encode(gzcompress(json_encode($id_usario))), '+/', '-_'), '=');
+            $idEventoEncriptado = rtrim(strtr(base64_encode(gzcompress(json_encode($id_evento))), '+/', '-_'), '=');
+            $totalEncriptado = rtrim(strtr(base64_encode(gzcompress(json_encode($total))), '+/', '-_'), '=');
 
             // Crear sesión de Stripe
             $session = Session::create([
@@ -290,12 +290,13 @@ class PagosController extends Controller
                 'mode' => 'payment',
 
                 // Enviar los IDs de asientos como query params
-                'success_url' => env('BACKEND_URL') 
-    . "/pago-exitoso-web"
-    . "?asientos=$asientosIncriptados"
-    . "&cliente=$id_usarioIncriptado"
-    . "&total=$totalIncriptados"
-    . "&evento=$id_eventoIncriptado",
+                env('FRONTEND_URL') .
+                "/index.php?ruta=pago_exitoso" .
+                "&asientos=" . urlencode($asientosIncriptados) .
+                "&cliente=" . urlencode($idClientesEncriptado) .
+                "&total=" . urlencode($totalEncriptado) .
+                "&evento=" . urlencode($idEventoEncriptado),
+
 
 
 
@@ -460,10 +461,10 @@ class PagosController extends Controller
         DB::beginTransaction();
 
         // Leer parámetros GET
-        $asientosIncriptados   = $request->query("asientos");
-        $idClientesEncriptado  = $request->query("cliente");
-        $totalEncriptado       = $request->query("total");
-        $idEventoEncriptado    = $request->query("evento");
+        $asientosIncriptados   = $request->asientos;
+        $idClientesEncriptado  = $request->cliente;
+        $totalEncriptado       = $request->total;
+        $idEventoEncriptado    = $request->evento;
 
         if (!$asientosIncriptados || !$idClientesEncriptado || !$totalEncriptado || !$idEventoEncriptado) {
             return response()->json([
