@@ -291,7 +291,7 @@ class PagosController extends Controller
 
                 // Enviar los IDs de asientos como query params
                 'success_url' => env('BACKEND_URL')
-                    . "/pago_exitoso"
+                    . "/pago-exitoso/web"
                     . "?asientos=$asientosIncriptados"
                     . "&cliente=$id_usarioIncriptado"
                     . "&total=$totalIncriptados"
