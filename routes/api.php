@@ -118,19 +118,21 @@ Route::get("proxima-funcion/{id}", [EventosController::class, "proximaFuncion"])
 Route::get("contador/proxima-funcion/{id}", [EventosController::class, "contarFuncionesProximas"]);
 Route::get("contador/funciones-vistas/{id}", [EventosController::class, "contarFuncionesVistas"]);
 
+
 //Tickets
 Route::get("listarTickets", [TicketController::class, "index"]);
 Route::post("registrarTickets", [TicketController::class, "store"]);
 Route::put("actualizarTickets/{id}", [TicketController::class, "update"]);
 Route::delete("eliminarTickets/{id}", [TicketController::class, "destroy"]);
 Route::post("/verificador-ticket", [TicketController::class, "verificarUsoTickect"]);
-
+Route::post("/mis-tickets/{id}", [TicketController::class, "misTickets"]);
 //Pagos
 Route::get("listarPagos", [PagosController::class, "index"]);
 Route::post("registrarPagos", [PagosController::class, "store"]);
 Route::put("actualizarPagos/{id}", [PagosController::class, "update"]);
 Route::delete("eliminarPagos/{id}", [PagosController::class, "destroy"]);
 Route::post('/pago/stripe', [PagosController::class, 'crearSesionPago']);
+Route::post('/pago/stripe-web', [PagosController::class, 'crearSesionPagoWeb']);
 Route::get('/pago-exitoso/{idsAsientos}/{idCliente}/{total}/{idEvento}', [PagosController::class, 'pagoExitoso']);
 Route::get('/informacion/ticket/{id}', [TicketController::class, 'informacionTicket']);
 Route::post('/stripe/webhook', [StripeWebhookController::class, 'handle']);

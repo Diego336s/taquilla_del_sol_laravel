@@ -172,7 +172,7 @@ class PagosController extends Controller
             $asientosIncriptados = rtrim(strtr(base64_encode(gzcompress(json_encode($asientosReservados))), '+/', '-_'), '=');
             $id_usarioIncriptado = rtrim(strtr(base64_encode(gzcompress(json_encode($id_usario))), '+/', '-_'), '=');
             $id_eventoIncriptado = rtrim(strtr(base64_encode(gzcompress(json_encode($id_evento))), '+/', '-_'), '=');
-            $totalIncriptados= rtrim(strtr(base64_encode(gzcompress(json_encode($total))), '+/', '-_'), '=');
+            $totalIncriptados = rtrim(strtr(base64_encode(gzcompress(json_encode($total))), '+/', '-_'), '=');
 
             // Crear sesión de Stripe
             $session = Session::create([
@@ -206,6 +206,110 @@ class PagosController extends Controller
         }
     }
 
+
+    public function crearSesionPagoWeb(Request $request)
+    {
+        // 1. VALIDACIÓN
+        $validator = Validator::make($request->all(), [
+            "asientos"   => "required|array|min:1|max:10",
+            "id_evento"  => "required|integer|exists:eventos,id",
+            "total"      => "required|integer|min:1",
+            "id_cliente"  => "required|integer|exists:clientes,id",
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                "success" => false,
+                "message" => "Error de validación.",
+                "errors"  => $validator->errors()
+            ], 422);
+        }
+
+        // Convertir array de asientos a string CSV
+        // [1,2,3] → "1,2,3"
+        $asientosReservados = $request->asientos;
+
+        // 2. VALIDAR QUE TODOS LOS ASIENTOS ESTÉN DISPONIBLES
+        foreach ($asientosReservados as $id) {
+
+            $asiento = DB::table('asientos_eventos as ae')
+                ->join('asientos as a', 'ae.asiento_id', '=', 'a.id')
+                ->join('ubicacion_asientos as u', 'a.ubicacion_id', '=', 'u.id')
+                ->join('precios_eventos as p', 'ae.precio_id', '=', 'p.id')
+                ->where('ae.id', $id)
+                ->select(
+                    'a.fila',
+                    'a.numero',
+                    'u.ubicacion',
+                    'p.precio',
+                    'ae.disponible'
+                )
+                ->first();
+
+            if (!$asiento) {
+                return response()->json([
+                    "success" => false,
+                    "message" => "Uno de los asientos no existe."
+                ]);
+            }
+
+            if ($asiento->disponible == false) {
+                return response()->json([
+                    "success" => false,
+                    "message" => "El asiento $asiento->numero de la fila $asiento->fila (ubicación $asiento->ubicacion) NO está disponible."
+                ]);
+            }
+        }
+
+        try {
+            Stripe::setApiKey(env('STRIPE_SECRET'));
+
+
+            $id_usario = $request->id_cliente;
+            $id_evento = $request->id_evento;
+            $total = $request->input('total');
+            $asientosIncriptados = rtrim(strtr(base64_encode(gzcompress(json_encode($asientosReservados))), '+/', '-_'), '=');
+            $id_usarioIncriptado = rtrim(strtr(base64_encode(gzcompress(json_encode($id_usario))), '+/', '-_'), '=');
+            $id_eventoIncriptado = rtrim(strtr(base64_encode(gzcompress(json_encode($id_evento))), '+/', '-_'), '=');
+            $totalIncriptados = rtrim(strtr(base64_encode(gzcompress(json_encode($total))), '+/', '-_'), '=');
+
+            // Crear sesión de Stripe
+            $session = Session::create([
+                'payment_method_types' => ['card'],
+                'line_items' => [[
+                    'price_data' => [
+                        'currency' => 'cop',
+                        'product_data' => [
+                            'name' => 'Reserva de Asientos',
+                            'description' => 'Pago de asientos seleccionados',
+                        ],
+                        'unit_amount' => $total * 100,  // centavos
+                    ],
+                    'quantity' => 1,
+                ]],
+                'mode' => 'payment',
+
+                // Enviar los IDs de asientos como query params
+                'success_url' => env('FRONTEND_URL') .
+                    "/index.php?ruta=pago-exitoso"
+                    . "&asientos=$asientosIncriptados"
+                    . "&cliente=$id_usarioIncriptado"
+                    . "&total=$totalIncriptados"
+                    . "&evento=$id_eventoIncriptado",
+
+                'cancel_url'  => env('FRONTEND_URL') . '/pago-cancelado',
+            ]);
+
+            return response()->json([
+                'url' => $session->url
+            ]);
+        } catch (\Exception $e) {
+
+            return response()->json([
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
 
     public function pagoExitoso($asientosIncriptados, $idClientesEncriptado, $totalEncriptado, $idEventoEncriptado)
     {
@@ -347,5 +451,4 @@ class PagosController extends Controller
             ], 400);
         }
     }
-
 }

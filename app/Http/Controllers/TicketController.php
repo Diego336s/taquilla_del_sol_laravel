@@ -234,4 +234,45 @@ class TicketController extends Controller
             "ticket" => $ticket
         ]);
     }
+
+    public function misTickets($clienteId)
+{ 
+
+    $tickets = DB::table('tickets')
+        ->join('eventos', 'eventos.id', '=', 'tickets.evento_id')
+        ->where('tickets.cliente_id', $clienteId)
+        ->select(
+            'tickets.id as ticket_id',
+            'tickets.precio',
+            'tickets.usado',
+            'tickets.fecha_compra',
+            'eventos.titulo as evento',
+            'eventos.fecha',
+            'eventos.hora_inicio',
+            'eventos.imagen'
+        )
+        ->orderBy('tickets.id', 'desc')
+        ->get();
+
+    // Obtener los asientos
+    foreach ($tickets as $t) {
+        $t->asientos = DB::table('reservas')
+            ->join('asientos', 'asientos.id', '=', 'reservas.asiento_id')
+            ->join('ubicaciones', 'ubicaciones.id', '=', 'asientos.ubicacion_id')
+            ->where('reservas.ticket_id', $t->ticket_id)
+            ->select(
+                'asientos.fila',
+                'asientos.numero',
+                'ubicaciones.nombre as ubicacion',
+                'ubicaciones.precio'
+            )
+            ->get();
+    }
+
+    return response()->json([
+        "success" => true,
+        "tickets" => $tickets
+    ]);
+}
+
 }
