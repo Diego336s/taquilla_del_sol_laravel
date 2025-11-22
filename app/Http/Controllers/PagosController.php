@@ -290,12 +290,13 @@ class PagosController extends Controller
                 'mode' => 'payment',
 
                 // Enviar los IDs de asientos como query params
-                'success_url' => env('BACKEND_URL')
-                    . "/pago-exitoso/web"
-                    . "?asientos=$asientosIncriptados"
-                    . "&cliente=$id_usarioIncriptado"
-                    . "&total=$totalIncriptados"
-                    . "&evento=$id_eventoIncriptado",
+                'success_url' => env('BACKEND_URL') 
+    . "/pago-exitoso-web"
+    . "?asientos=$asientosIncriptados"
+    . "&cliente=$id_usarioIncriptado"
+    . "&total=$totalIncriptados"
+    . "&evento=$id_eventoIncriptado",
+
 
 
                 'cancel_url'  => env('FRONTEND_URL') . '/pago-cancelado',

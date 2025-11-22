@@ -134,7 +134,7 @@ Route::delete("eliminarPagos/{id}", [PagosController::class, "destroy"]);
 Route::post('/pago/stripe', [PagosController::class, 'crearSesionPago']);
 Route::post('/pago/stripe-web', [PagosController::class, 'crearSesionPagoWeb']);
 Route::get('/pago-exitoso/{idsAsientos}/{idCliente}/{total}/{idEvento}', [PagosController::class, 'pagoExitoso']);
-Route::get('/pago-exitoso/web', [PagosController::class, 'pagoExitosoWeb']);
+Route::get('/pago-exitoso-web', [PagosController::class, 'pagoExitosoWeb']);
 Route::get('/informacion/ticket/{id}', [TicketController::class, 'informacionTicket']);
 Route::post('/stripe/webhook', [StripeWebhookController::class, 'handle']);
 
