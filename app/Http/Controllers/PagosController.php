@@ -290,12 +290,12 @@ class PagosController extends Controller
                 'mode' => 'payment',
 
                 // Enviar los IDs de asientos como query params
-                'success_url' => env('FRONTEND_URL') 
-    . "/index.php?ruta=pago_exitoso"
-    . "?asientos=$asientosIncriptados"
-    . "&cliente=$id_usarioIncriptado"
-    . "&total=$totalIncriptados"
-    . "&evento=$id_eventoIncriptado",
+                'success_url' => env('FRONTEND_URL')
+                    . "index.php?ruta=pago_exitoso"
+                    . "?asientos=$asientosIncriptados"
+                    . "&cliente=$id_usarioIncriptado"
+                    . "&total=$totalIncriptados"
+                    . "&evento=$id_eventoIncriptado",
 
 
 
