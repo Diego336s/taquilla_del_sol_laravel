@@ -10,6 +10,9 @@ use Illuminate\Queue\SerializesModels;
 
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
 use Barryvdh\Snappy\Facades\SnappyPdf;
+
+use Illuminate\Support\Facades\File;
+
 class TicketUsuario extends Mailable
 {
     use Queueable, SerializesModels;
@@ -37,19 +40,41 @@ class TicketUsuario extends Mailable
             'cliente'     => $this->ticket->nombre . ' ' . $this->ticket->apellido,
             'documento'   => $this->ticket->documento,
             'asientos'    => $this->asientos,
-            'total_pagado'=> $this->ticket->total_pagado,
-            'fecha_compra'=> (string)$this->ticket->fecha_compra,
+            'total_pagado' => $this->ticket->total_pagado,
+            'fecha_compra' => (string)$this->ticket->fecha_compra,
         ]);
 
-        $this->qr = base64_encode(
+        // Generamos base64
+        $qrBase64 = base64_encode(
             QrCode::format('svg')
                 ->size(250)
                 ->errorCorrection('H')
                 ->generate($payload)
         );
 
+        // Guardar qr como archivo
+        $this->saveQrFile($this->ticket->ticket_id, $qrBase64);
+        $this->qr = $qrBase64;
         return $this->qr;
     }
+
+
+    // Guardar qr en disco 
+    protected function saveQrFile($ticketId, $qrBase64)
+    {
+        $folder = public_path("qr");
+
+        if (!File::exists($folder)) {
+            File::makeDirectory($folder, 0755, true);
+        }
+
+        $qrData = base64_decode($qrBase64);
+        $filePath = $folder . "/ticket_{$ticketId}.svg";
+
+        File::put($filePath, $qrData);
+    }
+
+
 
     public function content(): Content
     {
@@ -77,7 +102,7 @@ class TicketUsuario extends Mailable
 
         return [
             \Illuminate\Mail\Mailables\Attachment::fromData(
-                fn () => $pdf->output(),
+                fn() => $pdf->output(),
                 'ticket-' . $this->ticket->ticket_id . '.pdf'
             )->withMime('application/pdf')
         ];
