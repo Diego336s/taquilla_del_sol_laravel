@@ -288,6 +288,7 @@ class TicketController extends Controller
         }
 
         try {
+            $baseUrl = env("APP_URL");
             // Traer tickets con datos del evento (leftJoin para no perder el ticket si el evento falta)
             $tickets = DB::table('tickets')
                 ->leftJoin('eventos', 'eventos.id', '=', 'tickets.evento_id')
@@ -304,7 +305,7 @@ class TicketController extends Controller
                     'eventos.fecha as fecha_evento',
                     'eventos.hora_inicio',
                     'eventos.hora_final',
-                    'eventos.imagen as imagen_evento'
+                    DB::raw("CONCAT('$baseUrl', eventos.imagen) AS imagen_evento")
                 )
                 ->orderBy('tickets.id', 'desc')
                 ->get();
