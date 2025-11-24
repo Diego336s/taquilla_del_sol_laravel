@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('tickets', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('evento_id')->constrained('eventos', 'id');
-            $table->foreignId('cliente_id')->constrained('clientes', 'id');           
+            $table->foreignId('evento_id')->constrained('eventos', 'id')->onDelete('cascade');
+            $table->foreignId('cliente_id')->constrained('clientes', 'id')->onDelete('cascade');           
             $table->decimal("precio", 8,2);
             $table->enum("estado",["pendiente","comprado","cancelado"]);
             $table->dateTime("fecha_compra");

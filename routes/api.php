@@ -58,6 +58,8 @@ Route::middleware(["auth:sanctum"])->group(function () {
         Route::put("actualizarCliente/{id}", [ClientesController::class, "updateCliente"]);
         Route::put("cambiar/clave/cliente/{id}", [ClientesController::class, "cambiarClave"]);
         Route::put("cambiar/correo/cliente/{id}", [ClientesController::class, "cambiarCorreo"]);
+        Route::delete('/cliente/eliminar-cuenta/{id}', [ClientesController::class, 'eliminarCuenta']);
+
     });
 });
 
@@ -128,6 +130,7 @@ Route::post("/verificador-ticket", [TicketController::class, "verificarUsoTickec
 Route::post("/mis-tickets/{id}", [TicketController::class, "misTickets"]);
 Route::get("/mis-tickets/cliente/{id}", [TicketController::class, "misTicketsCliente"]);
 Route::get('/ticket/pdf/{ticketId}', [TicketController::class, 'descargarPdfTicket']);
+Route::get('/ticket/detalles/{id}', [TicketController::class, 'informacionTicket']);
 
 
 //Pagos
