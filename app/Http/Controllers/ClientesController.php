@@ -279,7 +279,7 @@ class ClientesController extends Controller
             return response()->json([
                 "success" => false,
                 "message" => "No se encontró un cliente con ese correo"
-            ], 404);
+            ],404);
         }
 
         $cliente->update([

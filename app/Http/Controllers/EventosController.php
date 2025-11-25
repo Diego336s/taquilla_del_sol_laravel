@@ -209,7 +209,7 @@ class EventosController extends Controller
             DB::commit();
             return response()->json([
                 "success" => true,
-                "message" => "El evento $evento->tiitulo se ha aceptado correctamente."
+                "message" => "El evento $evento->titulo se ha aceptado correctamente."
             ]);
         } catch (\Exception $e) {
             DB::rollBack();
