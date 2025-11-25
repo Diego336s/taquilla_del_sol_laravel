@@ -58,6 +58,8 @@ Route::middleware(["auth:sanctum"])->group(function () {
         Route::put("actualizarCliente/{id}", [ClientesController::class, "updateCliente"]);
         Route::put("cambiar/clave/cliente/{id}", [ClientesController::class, "cambiarClave"]);
         Route::put("cambiar/correo/cliente/{id}", [ClientesController::class, "cambiarCorreo"]);
+        Route::delete('/cliente/eliminar-cuenta/{id}', [ClientesController::class, 'eliminarCuenta']);
+
     });
 });
 
@@ -126,6 +128,11 @@ Route::put("actualizarTickets/{id}", [TicketController::class, "update"]);
 Route::delete("eliminarTickets/{id}", [TicketController::class, "destroy"]);
 Route::post("/verificador-ticket", [TicketController::class, "verificarUsoTickect"]);
 Route::post("/mis-tickets/{id}", [TicketController::class, "misTickets"]);
+Route::get("/mis-tickets/cliente/{id}", [TicketController::class, "misTicketsCliente"]);
+Route::get('/ticket/pdf/{ticketId}', [TicketController::class, 'descargarPdfTicket']);
+Route::get('/ticket/detalles/{id}', [TicketController::class, 'informacionTicket']);
+
+
 //Pagos
 Route::get("listarPagos", [PagosController::class, "index"]);
 Route::post("registrarPagos", [PagosController::class, "store"]);

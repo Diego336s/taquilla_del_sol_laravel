@@ -6,6 +6,7 @@ use App\Models\Administradores;
 use App\Models\clientes;
 use App\Models\Empresas;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 
@@ -332,6 +333,30 @@ class ClientesController extends Controller
         return response()->json([
             "success" => true,
             "message" => "Correo actualizado, inicia sesión nuevamente."
+        ], 200);
+    }
+
+
+    public function eliminarCuenta($id)
+    {
+        $cliente = clientes::find($id);
+
+        if (!$cliente) {
+            return response()->json([
+                "success" => false,
+                "message" => "Cliente no encontrado"
+            ], 404);
+        }
+
+        // Eliminar tokens
+        $cliente->tokens()->delete();
+
+        // Eliminar cuenta
+        $cliente->delete();
+
+        return response()->json([
+            "success" => true,
+            "message" => "Cuenta eliminada correctamente"
         ], 200);
     }
 }
