@@ -5,7 +5,10 @@ namespace App\Http\Controllers;
 use App\Models\Administradores;
 use App\Models\clientes;
 use App\Models\Empresas;
+use App\Models\Eventos;
+use App\Models\Ticket;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 
@@ -14,16 +17,16 @@ class EmpresasController extends Controller
     /**
      * Listar todas las empresas
      */
-   public function index()
-{
-    $empresas = Empresas::all();
+    public function index()
+    {
+        $empresas = Empresas::all();
 
-    return response()->json([
-        "success" => true,
-        "message" => "Empresas listadas correctamente",
-        "data" => $empresas
-    ], 200);
-}
+        return response()->json([
+            "success" => true,
+            "message" => "Empresas listadas correctamente",
+            "data" => $empresas
+        ], 200);
+    }
 
     //crear una nueva empresa 
     public function store(Request $request)
@@ -81,29 +84,29 @@ class EmpresasController extends Controller
     // Mostrar una empresa por ID
 
     public function show($id)
-{
-    try {
-        $cliente = Clientes::find($id);
+    {
+        try {
+            $cliente = Clientes::find($id);
 
-        if (!$cliente) {
+            if (!$cliente) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Cliente no encontrado',
+                ], 404);
+            }
+
+            return response()->json([
+                'success' => true,
+                'data' => $cliente
+            ], 200);
+        } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Cliente no encontrado',
-            ], 404);
+                'message' => 'Error al obtener el cliente',
+                'error' => $e->getMessage()
+            ], 500);
         }
-
-        return response()->json([
-            'success' => true,
-            'data' => $cliente
-        ], 200);
-    } catch (\Exception $e) {
-        return response()->json([
-            'success' => false,
-            'message' => 'Error al obtener el cliente',
-            'error' => $e->getMessage()
-        ], 500);
     }
-}
 
 
     public function update(Request $request, string $id)
@@ -131,7 +134,7 @@ class EmpresasController extends Controller
         return response()->json($empresa, 200);
     }
 
-   public function cambiarClave(Request $request, string $id)
+    public function cambiarClave(Request $request, string $id)
     {
         $empresa = Empresas::find($id);
 
@@ -215,7 +218,7 @@ class EmpresasController extends Controller
             "message" => "Inicio de sesion exitoso",
             "token" => $token,
             "token_type" => "Bearer",
-            "empresa"=> $Empresas
+            "empresa" => $Empresas
         ]);
     }
 
@@ -240,7 +243,7 @@ class EmpresasController extends Controller
 
     //Restablecer clave empresa
 
-        public function olvideMiClaveEmpresa(Request $request)
+    public function olvideMiClaveEmpresa(Request $request)
     {
         $validator = Validator::make($request->all(), [
             "correo" => "required|string|email",
@@ -274,8 +277,8 @@ class EmpresasController extends Controller
             "message" => "Cambio de clave exitoso"
         ], 200);
     }
-    
-     public function cambiarCorreo(Request $request, string $id)
+
+    public function cambiarCorreo(Request $request, string $id)
     {
         $empresa = Empresas::find($id);
 
@@ -316,5 +319,76 @@ class EmpresasController extends Controller
             "success" => true,
             "message" => "Correo actualizado, inicia sesión nuevamente."
         ], 200);
+    }
+
+    public function totalVendidoEmpresaAño($id)
+    {
+        $totalVendido = DB::table('tickets')
+            ->join('eventos', 'tickets.evento_id', '=', 'eventos.id')
+            ->where('eventos.empresa_id', $id)
+            ->where('tickets.estado', 'comprado')
+            ->whereYear('tickets.fecha_compra', now()->year)
+            ->sum('tickets.precio');
+
+        return response()->json([
+            "success" => true,
+            "total_vendido" => $totalVendido
+        ]);
+    }
+
+    public function totalDeEventosRelizadosPorEmpresa($id)
+    {
+        $totalEventosRealizados = Eventos::where('empresa_id', $id)
+            ->where('estado', 'realizado')
+            ->count();
+        return response()->json([
+            "success" => true,
+            "total_eventos_realizados" => $totalEventosRealizados
+        ]);
+    }
+
+    public function totalDeAsientosVendidos($id)
+    {
+        $totalAsientosVendidos = DB::table('asientos_eventos AS ae')
+            ->join('eventos AS e', 'ae.evento_id', '=', 'e.id')
+            ->where('e.empresa_id', $id)
+            ->where('ae.disponible', 0)
+            ->count();
+
+        return response()->json([
+            "success" => true,
+            "total_asientos_vendidos" => $totalAsientosVendidos
+        ]);
+    }
+
+    public function crecimientoMesAMes($id)
+    {
+        $mes = now()->month;
+        $anio = now()->year;
+
+        $ventasActual = DB::table('tickets as t')
+            ->join('eventos as e', 't.evento_id', '=', 'e.id')
+            ->where('e.empresa_id', $id)
+            ->where('t.estado', 'comprado')
+            ->whereYear('t.fecha_compra', $anio)
+            ->whereMonth('t.fecha_compra', $mes)
+            ->sum('t.precio');
+
+        $ventasPasado = DB::table('tickets as t')
+            ->join('eventos as e', 't.evento_id', '=', 'e.id')
+            ->where('e.empresa_id', $id)
+            ->where('t.estado', 'comprado')
+            ->whereYear('t.fecha_compra', $anio - 1)
+            ->whereMonth('t.fecha_compra', $mes)
+            ->sum('t.precio');
+
+        $crecimiento = $ventasPasado > 0
+            ? (($ventasActual - $ventasPasado) / $ventasPasado) * 100
+            : null;
+
+        return response()->json([
+            "success" => true,
+            "crecimiento_mensual" => $crecimiento
+        ]);
     }
 }

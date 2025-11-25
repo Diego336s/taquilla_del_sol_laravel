@@ -247,9 +247,9 @@ class EventosController extends Controller
             'titulo'        => 'required|string|max:200',
             'descripcion'   => 'required|string',
             'fecha'         => 'required|date',
-            'hora_inicio'   => 'required|string|size:8',
-            'hora_final'    => 'required|string|size:8',
-            'imagen'        => 'required|image',
+            'hora_inicio'   => 'required|string',
+            'hora_final'    => 'required|string',
+            'imagen'        => 'required|image|mimes:jpg,jpeg,png,webp|max:4096',
             'estado'        => 'required|in:activo,pendiente,cancelado,finalizado',
             'empresa_id'    => 'required|integer|exists:empresas,id',
             'categoria_id'  => 'required|integer|exists:categorias,id',
@@ -259,7 +259,7 @@ class EventosController extends Controller
             DB::rollBack();
             return response()->json([
                 "success" => false,
-                "message" => "Error de validaciones en el servidor.",
+                "message" => "Error de validaciones campos evento en el servidor.",
                 "error" =>  $validacionParaEvento->errors()
             ], 400);
         }
@@ -267,16 +267,16 @@ class EventosController extends Controller
 
         $validacionParaPrecios = Validator::make($request->all(), [
             "precioPrimerPiso" => "required|integer",
-            "precioSugundoPiso" => "required|integer",
+            "precioSegundoPiso" => "required|integer",
             "precioGeneral" => "required|integer"
         ]);
         if ($validacionParaPrecios->fails()) {
             DB::rollBack();
             return response()->json([
                 "success" => false,
-                "message" => "Error de validaciones en el servidor.",
+                "message" => "Error de validaciones precios en el servidor.",
                 "error" =>  $validacionParaPrecios->errors()
-            ], 400);
+            ]);
         }
         try {
 
@@ -284,7 +284,7 @@ class EventosController extends Controller
                 return response()->json([
                     "success" => false,
                     "message" => "Ya existe un evento registrado en esta fecha."
-                ], 400);
+                ]);
             }
 
             $validator_datos = $validacionParaEvento->validated();
@@ -341,7 +341,7 @@ class EventosController extends Controller
                     preciosEvento::create([
                         "evento_id" => $idEventoCreado,
                         "ubicacion_id" => $i,
-                        "precio" => $request->precioSugundoPiso
+                        "precio" => $request->precioSegundoPiso
                     ]);
                 }
             }
@@ -371,7 +371,7 @@ public function eventosPorEmpresa($id)
         return response()->json([
             "success" => false,
             "message" => "No hay eventos para esta empresa."
-        ], 404);
+        ]);
     }
 
     return response()->json([
@@ -384,7 +384,7 @@ public function eventosPorEmpresa($id)
     {
         $eventos = Eventos::find($id);
         if (!$eventos) {
-            return response()->json(['message' => 'Evento no encontrado'], 404);
+            return response()->json(['message' => 'Evento no encontrado']);
         }
         return response()->json($eventos);
     }
@@ -393,7 +393,7 @@ public function eventosPorEmpresa($id)
         $eventos = Eventos::find($id);
 
         if (!$eventos) {
-            return response()->json(['message' => 'Evento no encontrado'], 404);
+            return response()->json(['message' => 'Evento no encontrado']);
         }
 
         $validator = Validator::make($request->all(), [
@@ -600,5 +600,17 @@ public function contarFuncionesVistas($idCliente)
     ]);
 }
 
+public function contadorObrasActivas($idEmpresa)
+{
+    $cantidad = DB::table('eventos')
+        ->where('id', $idEmpresa)
+        ->where('estado', 'activo')
+        ->count();
+
+    return response()->json([
+        "success" => true,
+        "obras_activas" => $cantidad
+    ]);
+}
 
 }

@@ -14,6 +14,7 @@ use App\Http\Controllers\CodigoVerificacionController;
 use App\Http\Controllers\StripeWebhookController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use Symfony\Contracts\EventDispatcher\Event;
 
 // Route::get('/user', function (Request $request) {
 //     return $request->user();
@@ -100,7 +101,10 @@ Route::put("actualizarEmpresa/{id}", [EmpresasController::class, "update"]);
 Route::delete("eliminarEmpresa/{id}", [EmpresasController::class, "destroy"]);
 Route::put("cambiarClave/{id}", [EmpresasController::class, "cambiarClave"]);
 Route::put("cambiar/correo/empresa/{id}", [EmpresasController::class, "cambiarCorreo"]);
-
+Route::get("total-vendido-empresa-año/{id}", [EmpresasController::class, "totalVendidoEmpresaAño"]);
+Route::get("total-eventos-realizados/{id}", [EmpresasController::class, "totalDeEventosRelizadosPorEmpresa"]);
+Route::get("total-asientos-vendidos/{id}", [EmpresasController::class, "totalDeAsientosVendidos"]);
+Route::get("crecimiento-mensual/{id}", [EmpresasController::class, "crecimientoMesAMes"]);
 
 //Categorias
 Route::get("listarCategorias", [CategoriasController::class, "index"]);
@@ -119,7 +123,7 @@ Route::post("cambiar/estado/evento/{id}", [EventosController::class, "cambioDeEs
 Route::get("proxima-funcion/{id}", [EventosController::class, "proximaFuncion"]);
 Route::get("contador/proxima-funcion/{id}", [EventosController::class, "contarFuncionesProximas"]);
 Route::get("contador/funciones-vistas/{id}", [EventosController::class, "contarFuncionesVistas"]);
-
+Route::get("contador/obras-activas/{id}", [EventosController::class, "contadorObrasActivas"]);
 
 //Tickets
 Route::get("listarTickets", [TicketController::class, "index"]);
