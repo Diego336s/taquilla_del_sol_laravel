@@ -7,7 +7,7 @@ use App\Models\asientosEventos;
 use App\Models\Pagos;
 use App\Models\reservaAsientos;
 use App\Models\Ticket;
-
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Crypt;
@@ -328,7 +328,7 @@ class PagosController extends Controller
                 "message" => "No llegaron asientos válidos"
             ], 400);
         }
-
+        $hoy = Carbon::now('America/Bogota');
 
         try {
 
@@ -338,7 +338,7 @@ class PagosController extends Controller
                 'precio' => $total,
                 'estado' => "comprado",
                 "usado" => false,
-                'fecha_compra' => now(),
+                'fecha_compra' => $hoy,
             ]);
 
             if (!$ticket) {
