@@ -108,7 +108,7 @@ Route::get("total-asientos-vendidos/{id}", [EmpresasController::class, "totalDeA
 Route::get("proxima-funcion-empresa/{id}", [EmpresasController::class, "proximaFuncion"]);
 Route::get("entradas-mensuales/{id}", [EmpresasController::class, "entradasMesuales"]);
 Route::get("ultimos-eventos/{id}", [EmpresasController::class, "ultimosTresEventosRealizados"]);
-
+Route::get("eventos-realizados-empresa/{id}", [EmpresasController::class, "eventosRealizados"]);
 
 //Categorias
 Route::get("listarCategorias", [CategoriasController::class, "index"]);

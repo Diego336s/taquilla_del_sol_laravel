@@ -472,5 +472,62 @@ class EmpresasController extends Controller
         ]);
     }
 
+
+    public function eventosRealizados($empresaId)
+{
+    // Traer todos los eventos realizados (fecha pasada o estado finalizado)
+    $eventos = DB::table('eventos')
+        ->where('empresa_id', $empresaId)
+        ->where('estado', 'finalizado') // O usa fecha < hoy si lo deseas
+        ->orderBy('fecha', 'desc')
+        ->get();
+
+    if ($eventos->isEmpty()) {
+        return response()->json([
+            "success" => false,
+            "message" => "No hay eventos realizados para esta empresa"
+        ]);
+    }
+
+    // Mapear cada evento y agregarle estadísticas
+    $eventos = $eventos->map(function ($evento) {
+
+        // 1. Tickets comprados del evento
+        $ticketsIds = DB::table('tickets')
+            ->where('evento_id', $evento->id)
+            ->where('estado', 'comprado')
+            ->pluck('id');
+
+        // 2. Asientos vendidos (reserva_asientos)
+        $asientosVendidos = DB::table('reserva_asientos')
+            ->whereIn('ticket_id', $ticketsIds)
+            ->count();
+
+        // 3. Total dinero recaudado
+        $totalDinero = DB::table('tickets')
+            ->whereIn('id', $ticketsIds)
+            ->sum('precio');
+
+        // 4. Porcentaje de ocupación
+        $capacidad = 270;
+        $ocupacion = $asientosVendidos > 0
+            ? round(($asientosVendidos / $capacidad) * 100, 2)
+            : 0;
+
+        // Agregar datos al objeto evento
+        $evento->asientos_vendidos = $asientosVendidos;
+        $evento->total_dinero = $totalDinero;
+        $evento->porcentaje_ocupacion = $ocupacion;
+
+        return $evento;
+    });
+
+    return response()->json([
+        "success" => true,
+        "eventos" => $eventos
+    ]);
+}
+
+
     
 }
