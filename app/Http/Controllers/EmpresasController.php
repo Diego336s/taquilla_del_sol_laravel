@@ -340,7 +340,7 @@ class EmpresasController extends Controller
     public function totalDeEventosRelizadosPorEmpresa($id)
     {
         $totalEventosRealizados = Eventos::where('empresa_id', $id)
-            ->where('estado', 'realizado')
+            ->where('estado', 'finalizado')
             ->count();
         return response()->json([
             "success" => true,

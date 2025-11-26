@@ -129,6 +129,8 @@ Route::get("contador/proxima-funcion/{id}", [EventosController::class, "contarFu
 Route::get("contador/funciones-vistas/{id}", [EventosController::class, "contarFuncionesVistas"]);
 Route::get("contador/obras-activas/{id}", [EventosController::class, "contadorObrasActivas"]);
 
+
+
 //Tickets
 Route::get("listarTickets", [TicketController::class, "index"]);
 Route::post("registrarTickets", [TicketController::class, "store"]);

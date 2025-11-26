@@ -6,6 +6,7 @@ use App\Models\Asientos;
 use App\Models\asientosEventos;
 use App\Models\Eventos;
 use App\Models\preciosEvento;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -50,7 +51,6 @@ class EventosController extends Controller
             "success" => true,
             "evento" =>  $evento
         ], 200);
-
     }
 
     public function cambioDeEstadoDelEvento(Request $request, $id)
@@ -71,6 +71,16 @@ class EventosController extends Controller
         }
 
         try {
+            if (Eventos::where("fecha", $request->fecha)
+                ->where("estado", "activo")
+                ->exists()
+            ) {
+                DB::rollBack();
+                return response()->json([
+                    "success" => false,
+                    "message" => "Ya existe un evento activo en esta fecha."
+                ]);
+            }
             $evento = Eventos::find($id);
             if (!$evento) {
                 DB::rollBack();
@@ -80,8 +90,8 @@ class EventosController extends Controller
                 ], 400);
             }
 
-            if($evento->estado === "activo"){
-              DB::rollBack();
+            if ($evento->estado === "activo") {
+                DB::rollBack();
                 return response()->json([
                     "success" => false,
                     'message' => 'El evento ya esta activo.'
@@ -280,7 +290,10 @@ class EventosController extends Controller
         }
         try {
 
-            if (Eventos::where("fecha", $request->fecha)->exists()) {
+            if (Eventos::where("fecha", $request->fecha)
+                ->where("estado", "activo")
+                ->exists()
+            ) {
                 return response()->json([
                     "success" => false,
                     "message" => "Ya existe un evento registrado en esta fecha."
@@ -363,22 +376,22 @@ class EventosController extends Controller
         ], 200);
     }
 
-public function eventosPorEmpresa($id)
-{
-    $eventos = Eventos::where("empresa_id", $id)->get();
+    public function eventosPorEmpresa($id)
+    {
+        $eventos = Eventos::where("empresa_id", $id)->get();
 
-    if ($eventos->isEmpty()) {
+        if ($eventos->isEmpty()) {
+            return response()->json([
+                "success" => false,
+                "message" => "No hay eventos para esta empresa."
+            ]);
+        }
+
         return response()->json([
-            "success" => false,
-            "message" => "No hay eventos para esta empresa."
-        ]);
+            "success" => true,
+            "eventos" => $eventos
+        ], 200);
     }
-
-    return response()->json([
-        "success" => true,
-        "eventos" => $eventos
-    ], 200);
-}
 
     public function show(string $id)
     {
@@ -489,128 +502,129 @@ public function eventosPorEmpresa($id)
         return response()->json(['message' => 'Evento eliminado correctamente']);
     }
 
-  public function proximaFuncion($idCliente)
-{
-    $hoy = now()->toDateString();
+    public function proximaFuncion($idCliente)
+    {
+        $hoy = now()->toDateString();
 
-    // 1️⃣ Obtener el evento más próximo del cliente
-    $evento = DB::table('clientes')
-        ->join('tickets', 'tickets.cliente_id', '=', 'clientes.id')
-        ->join('eventos', 'eventos.id', '=', 'tickets.evento_id')
-        ->where('clientes.id', $idCliente)
-        ->whereDate('eventos.fecha', '>=', $hoy)
-        ->orderBy('eventos.fecha', 'asc')
-        ->select(
-            'eventos.id as evento_id',
-            'eventos.titulo',
-            'eventos.fecha as fecha_evento',
-            'eventos.hora_inicio',
-            'eventos.hora_final'
-        )
-        ->first();
+        // 1️⃣ Obtener el evento más próximo del cliente
+        $evento = DB::table('clientes')
+            ->join('tickets', 'tickets.cliente_id', '=', 'clientes.id')
+            ->join('eventos', 'eventos.id', '=', 'tickets.evento_id')
+            ->where('clientes.id', $idCliente)
+            ->whereDate('eventos.fecha', '>=', $hoy)
+            ->orderBy('eventos.fecha', 'asc')
+            ->select(
+                'eventos.id as evento_id',
+                'eventos.titulo',
+                'eventos.fecha as fecha_evento',
+                'eventos.hora_inicio',
+                'eventos.hora_final'
+            )
+            ->first();
 
-    if (!$evento) {
+        if (!$evento) {
+            return response()->json([
+                "success" => false,
+                "message" => "No tienes funciones próximas"
+            ]);
+        }
+
+        // 2️⃣ Obtener TODOS los tickets del cliente para ese evento
+        $tickets = DB::table('tickets')
+            ->where('cliente_id', $idCliente)
+            ->where('evento_id',  $evento->evento_id)
+            ->get();
+
+        $idsTickets = $tickets->pluck('id')->toArray();
+
+        // 3️⃣ Obtener todos los asientos reservados en esos tickets
+        $asientos = DB::table('reserva_asientos')
+            ->join('asientos_eventos', 'asientos_eventos.id', '=', 'reserva_asientos.asiento_evento_id')
+            ->join('asientos', 'asientos.id', '=', 'asientos_eventos.asiento_id')
+            ->join('ubicacion_asientos', 'ubicacion_asientos.id', '=', 'asientos.ubicacion_id')
+            ->join('precios_eventos', 'precios_eventos.id', '=', 'asientos_eventos.precio_id')
+            ->whereIn('reserva_asientos.ticket_id', $idsTickets)
+            ->orderBy('asientos.fila')
+            ->orderBy('asientos.numero')
+            ->select(
+                'asientos.fila',
+                'asientos.numero',
+                'ubicacion_asientos.ubicacion',
+                'precios_eventos.precio as precio_asiento'
+            )
+            ->get();
+
+        // 4️⃣ Obtener datos del cliente (una sola vez)
+        $cliente = DB::table('clientes')->where('id', $idCliente)->first();
+
         return response()->json([
-            "success" => false,
-            "message" => "No tienes funciones próximas"
+            "success" => true,
+            "proxima_funcion" => [
+                "evento" => [
+                    "titulo"       => $evento->titulo,
+                    "fecha_evento" => $evento->fecha_evento,
+                    "hora_inicio"  => $evento->hora_inicio,
+                    "hora_final"   => $evento->hora_final,
+                ],
+                "cliente" => [
+                    "nombre"     => $cliente->nombre,
+                    "apellido"   => $cliente->apellido,
+                    "correo"     => $cliente->correo,
+                    "documento"  => $cliente->documento,
+                    "telefono"   => $cliente->telefono,
+                ],
+                "tickets" => $tickets,         // TODOS los tickets del evento
+                "asientos" => $asientos         // TODOS los asientos asignados
+            ]
         ]);
     }
 
-    // 2️⃣ Obtener TODOS los tickets del cliente para ese evento
-    $tickets = DB::table('tickets')
-        ->where('cliente_id', $idCliente)
-        ->where('evento_id',  $evento->evento_id)
-        ->get();
+    public function contarFuncionesProximas($idCliente)
+    {
+        $hoy = now()->toDateString(); // Fecha actual
 
-    $idsTickets = $tickets->pluck('id')->toArray();
+        $cantidad = DB::table('tickets')
+            ->join('eventos', 'eventos.id', '=', 'tickets.evento_id')
+            ->where('tickets.cliente_id', $idCliente)
+            ->whereDate('eventos.fecha', '>=', $hoy)
+            ->distinct('tickets.evento_id') // <<< SOLO UN EVENTO ÚNICO
+            ->count('tickets.evento_id');
 
-    // 3️⃣ Obtener todos los asientos reservados en esos tickets
-    $asientos = DB::table('reserva_asientos')
-        ->join('asientos_eventos', 'asientos_eventos.id', '=', 'reserva_asientos.asiento_evento_id')
-        ->join('asientos', 'asientos.id', '=', 'asientos_eventos.asiento_id')
-        ->join('ubicacion_asientos', 'ubicacion_asientos.id', '=', 'asientos.ubicacion_id')
-        ->join('precios_eventos', 'precios_eventos.id', '=', 'asientos_eventos.precio_id')
-        ->whereIn('reserva_asientos.ticket_id', $idsTickets)
-        ->orderBy('asientos.fila')
-        ->orderBy('asientos.numero')
-        ->select(
-            'asientos.fila',
-            'asientos.numero',
-            'ubicacion_asientos.ubicacion',
-            'precios_eventos.precio as precio_asiento'
-        )
-        ->get();
+        return response()->json([
+            "success" => true,
+            "proximas_funciones" => $cantidad
+        ]);
+    }
 
-    // 4️⃣ Obtener datos del cliente (una sola vez)
-    $cliente = DB::table('clientes')->where('id', $idCliente)->first();
+    public function contarFuncionesVistas($idCliente)
+    {
+        $hoy = now()->toDateString(); // Fecha actual
 
-    return response()->json([
-        "success" => true,
-        "proxima_funcion" => [
-            "evento" => [
-                "titulo"       => $evento->titulo,
-                "fecha_evento" => $evento->fecha_evento,
-                "hora_inicio"  => $evento->hora_inicio,
-                "hora_final"   => $evento->hora_final,
-            ],
-            "cliente" => [
-                "nombre"     => $cliente->nombre,
-                "apellido"   => $cliente->apellido,
-                "correo"     => $cliente->correo,
-                "documento"  => $cliente->documento,
-                "telefono"   => $cliente->telefono,
-            ],
-            "tickets" => $tickets,         // TODOS los tickets del evento
-            "asientos" => $asientos         // TODOS los asientos asignados
-        ]
-    ]);
-}
+        $cantidad = DB::table('tickets')
+            ->join('eventos', 'eventos.id', '=', 'tickets.evento_id')
+            ->where('tickets.cliente_id', $idCliente)
+            ->whereDate('eventos.fecha', '<', $hoy) // FECHA PASADA = función vista
+            ->distinct('tickets.evento_id')         // NO duplicar
+            ->count('tickets.evento_id');
 
-public function contarFuncionesProximas($idCliente)
-{
-    $hoy = now()->toDateString(); // Fecha actual
+        return response()->json([
+            "success" => true,
+            "funciones_vistas" => $cantidad
+        ]);
+    }
 
-    $cantidad = DB::table('tickets')
-        ->join('eventos', 'eventos.id', '=', 'tickets.evento_id')
-        ->where('tickets.cliente_id', $idCliente)
-        ->whereDate('eventos.fecha', '>=', $hoy)
-        ->distinct('tickets.evento_id') // <<< SOLO UN EVENTO ÚNICO
-        ->count('tickets.evento_id');
+    public function contadorObrasActivas($idEmpresa)
+    {
+        $cantidad = DB::table('eventos')
+            ->where('empresa_id', $idEmpresa)
+            ->where('estado', 'activo')
+            ->count();
 
-    return response()->json([
-        "success" => true,
-        "proximas_funciones" => $cantidad
-    ]);
-}
+        return response()->json([
+            "success" => true,
+            "obras_activas" => $cantidad
+        ]);
+    }
 
-public function contarFuncionesVistas($idCliente)
-{
-    $hoy = now()->toDateString(); // Fecha actual
-
-    $cantidad = DB::table('tickets')
-        ->join('eventos', 'eventos.id', '=', 'tickets.evento_id')
-        ->where('tickets.cliente_id', $idCliente)
-        ->whereDate('eventos.fecha', '<', $hoy) // FECHA PASADA = función vista
-        ->distinct('tickets.evento_id')         // NO duplicar
-        ->count('tickets.evento_id');
-
-    return response()->json([
-        "success" => true,
-        "funciones_vistas" => $cantidad
-    ]);
-}
-
-public function contadorObrasActivas($idEmpresa)
-{
-    $cantidad = DB::table('eventos')
-        ->where('id', $idEmpresa)
-        ->where('estado', 'activo')
-        ->count();
-
-    return response()->json([
-        "success" => true,
-        "obras_activas" => $cantidad
-    ]);
-}
-
+   
 }
