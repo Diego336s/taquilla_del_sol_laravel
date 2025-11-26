@@ -6,13 +6,13 @@ use App\Models\Administradores;
 use App\Models\clientes;
 use App\Models\Empresas;
 use App\Models\Eventos;
-use App\Models\Ticket;
+
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
-
+use Barryvdh\Snappy\Facades\SnappyPdf as PDF;
 class EmpresasController extends Controller
 {
     /**
@@ -528,6 +528,59 @@ class EmpresasController extends Controller
     ]);
 }
 
+public function reporteEventoPDF($id)
+{
+    $evento = DB::table('eventos')->where('id', $id)->first();
+
+    if (!$evento) {
+        return response()->json([
+            "success" => false,
+            "message" => "El evento no existe"
+        ], 404);
+    }
+
+    // Tickets comprados
+    $ticketsIds = DB::table('tickets')
+        ->where('evento_id', $evento->id)
+        ->where('estado', 'comprado')
+        ->pluck('id');
+
+    // Asientos vendidos
+    $asientosVendidos = DB::table('reserva_asientos')
+        ->whereIn('ticket_id', $ticketsIds)
+        ->count();
+
+    // Total dinero
+    $totalDinero = DB::table('tickets')
+        ->whereIn('id', $ticketsIds)
+        ->sum('precio');
+
+    // Porcentaje ocupación
+    $capacidad = 270;
+    $ocupacion = $asientosVendidos > 0
+        ? round(($asientosVendidos / $capacidad) * 100, 2)
+        : 0;
+
+    // DATA para la vista
+    $data = [
+        "evento" => $evento,
+        "asientosVendidos" => $asientosVendidos,
+        "totalDinero" => $totalDinero,
+        "porcentajeOcupacion" => $ocupacion,
+        "fechaReporte" => Carbon::now()->format("Y-m-d H:i")
+    ];
+
+    // Generar PDF con SnappyPDF
+    $pdf = PDF::loadView('reportes.evento', $data)
+        ->setPaper('a4')
+        ->setOption('margin-top', '20mm')
+        ->setOption('margin-bottom', '20mm')
+        ->setOption('margin-left', '15mm')
+        ->setOption('margin-right', '15mm')
+        ->setOption('encoding', 'UTF-8');
+
+    return $pdf->download("Reporte_Evento_{$evento->titulo}.pdf");
+}
 
     
 }

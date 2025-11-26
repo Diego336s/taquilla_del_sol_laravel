@@ -109,6 +109,8 @@ Route::get("proxima-funcion-empresa/{id}", [EmpresasController::class, "proximaF
 Route::get("entradas-mensuales/{id}", [EmpresasController::class, "entradasMesuales"]);
 Route::get("ultimos-eventos/{id}", [EmpresasController::class, "ultimosTresEventosRealizados"]);
 Route::get("eventos-realizados-empresa/{id}", [EmpresasController::class, "eventosRealizados"]);
+Route::get("reporte-evento/{id}", [EmpresasController::class, "reporteEventoPDF"]);
+
 
 //Categorias
 Route::get("listarCategorias", [CategoriasController::class, "index"]);
@@ -144,10 +146,6 @@ Route::get('/ticket/detalles/{id}', [TicketController::class, 'informacionTicket
 
 
 //Pagos
-Route::get("listarPagos", [PagosController::class, "index"]);
-Route::post("registrarPagos", [PagosController::class, "store"]);
-Route::put("actualizarPagos/{id}", [PagosController::class, "update"]);
-Route::delete("eliminarPagos/{id}", [PagosController::class, "destroy"]);
 Route::post('/pago/stripe', [PagosController::class, 'crearSesionPago']);
 Route::post('/pago/stripe-web', [PagosController::class, 'crearSesionPagoWeb']);
 Route::get('/pago-exitoso/{idsAsientos}/{idCliente}/{total}/{idEvento}', [PagosController::class, 'pagoExitoso']);
