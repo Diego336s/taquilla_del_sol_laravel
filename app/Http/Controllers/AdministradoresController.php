@@ -16,7 +16,7 @@ class AdministradoresController extends Controller
         $administradores = Administradores::all();
         return response()->json($administradores);
     }
- public function me(Request $request)
+    public function me(Request $request)
     {
         return response()->json([
             "success" => true,
@@ -100,12 +100,19 @@ class AdministradoresController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return response()->json($validator->errors(), 422);
+            return response()->json([
+                "success" => false,
+                "errors" => $validator->errors()
+            ], 422);
         }
 
         $administradores->update($validator->validate());
 
-        return response()->json($administradores);
+        return response()->json([
+            "success" => true,
+            "message" => "Perfil actualizado correctamente",
+            "administrador" => $administradores
+        ]);
     }
 
     public function cambiarClave(Request $request, string $id)
