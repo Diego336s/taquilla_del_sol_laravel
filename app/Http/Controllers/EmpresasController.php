@@ -7,6 +7,7 @@ use App\Models\clientes;
 use App\Models\Empresas;
 use App\Models\Eventos;
 use App\Models\Ticket;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -360,35 +361,116 @@ class EmpresasController extends Controller
             "total_asientos_vendidos" => $totalAsientosVendidos
         ]);
     }
-
-    public function crecimientoMesAMes($id)
+    public function proximaFuncion($id)
     {
-        $mes = now()->month;
-        $anio = now()->year;
+        $hoy = Carbon::now('America/Bogota');
 
-        $ventasActual = DB::table('tickets as t')
-            ->join('eventos as e', 't.evento_id', '=', 'e.id')
-            ->where('e.empresa_id', $id)
-            ->where('t.estado', 'comprado')
-            ->whereYear('t.fecha_compra', $anio)
-            ->whereMonth('t.fecha_compra', $mes)
-            ->sum('t.precio');
+        // Buscar próximo evento activo
+        $evento = DB::table('eventos')
+            ->where('empresa_id', $id)
+            ->where('estado', 'activo')
+            ->whereDate('fecha', '>=', $hoy)
+            ->orderBy('fecha', 'asc')
+            ->first();
 
-        $ventasPasado = DB::table('tickets as t')
-            ->join('eventos as e', 't.evento_id', '=', 'e.id')
-            ->where('e.empresa_id', $id)
-            ->where('t.estado', 'comprado')
-            ->whereYear('t.fecha_compra', $anio - 1)
-            ->whereMonth('t.fecha_compra', $mes)
-            ->sum('t.precio');
+        if (!$evento) {
+            return response()->json([
+                "success" => false,
+                "message" => "No hay próximos eventos para esta empresa"
+            ]);
+        }
 
-        $crecimiento = $ventasPasado > 0
-            ? (($ventasActual - $ventasPasado) / $ventasPasado) * 100
-            : null;
+        // 1. Tickets comprados
+        $ticketsIds = DB::table('tickets')
+            ->where('evento_id', $evento->id)
+            ->where('estado', 'comprado')
+            ->pluck('id');
+
+        // 2. Asientos vendidos
+        $asientosVendidos = DB::table('reserva_asientos')
+            ->whereIn('ticket_id', $ticketsIds)
+            ->count();
+
+        // 3. Total dinero
+        $totalDinero = DB::table('tickets')
+            ->whereIn('id', $ticketsIds)
+            ->sum('precio');
+
+        // 4. Porcentaje ocupación
+        $capacidad = 270;
+        $ocupacion = $asientosVendidos > 0
+            ? round(($asientosVendidos / $capacidad) * 100, 2)
+            : 0;
+
+        // 5. Días faltantes
+        $evento->dias_faltantes = $hoy->diffInDays(Carbon::parse($evento->fecha));
+
+        // Agregar datos extra
+        $evento->asientos_vendidos = $asientosVendidos;
+        $evento->total_dinero = $totalDinero;
+        $evento->porcentaje_ocupacion = $ocupacion;
 
         return response()->json([
             "success" => true,
-            "crecimiento_mensual" => $crecimiento
+            "evento" => $evento
         ]);
     }
+
+    public function entradasMesuales($empresaId)
+    {
+        $entradasMensuales = DB::table('tickets')
+            ->join('eventos', 'tickets.evento_id', '=', 'eventos.id')
+            ->where('eventos.empresa_id', $empresaId)
+            ->where('tickets.estado', 'comprado')
+            ->whereYear('tickets.fecha_compra', now()->year)
+            ->selectRaw('MONTH(tickets.fecha_compra) as mes, SUM(tickets.precio) as total')
+            ->groupBy('mes')
+            ->orderBy('mes', 'asc')
+            ->get();
+
+        return response()->json([
+            "success" => true,
+            "estradasMensuales" => $entradasMensuales
+        ]);
+    }
+
+    public function ultimosTresEventosRealizados($empresaId)
+    {
+        $ultimosEventos = DB::table('eventos')
+            ->where('empresa_id', $empresaId)
+            ->where('estado', 'finalizado') // o "activo" si quieres activos
+            ->orderBy('fecha', 'desc')
+            ->take(3)
+            ->get()
+            ->map(function ($ev) {
+
+                // Tickets de este evento
+                $ticketsIds = DB::table('tickets')
+                    ->where('evento_id', $ev->id)
+                    ->where('estado', 'comprado')
+                    ->pluck('id');
+
+                // Asientos vendidos
+                $asientos = DB::table('reserva_asientos')
+                    ->whereIn('ticket_id', $ticketsIds)
+                    ->count();
+
+                // Total dinero
+                $ingresos = DB::table('tickets')
+                    ->whereIn('id', $ticketsIds)
+                    ->sum('precio');
+
+                $ev->asientos_vendidos = $asientos;
+                $ev->dinero = $ingresos;
+
+                return $ev;
+            });
+
+        return response()->json([
+            "success" => true,
+            "ultimosEventos" => $ultimosEventos
+        ]);
+    }
+
+    
 }

@@ -191,8 +191,8 @@ class PagosController extends Controller
                 'mode' => 'payment',
 
                 // Enviar los IDs de asientos como query params
-                'success_url' => env('FRONTEND_URL') . "/api/pago-exitoso/$asientosIncriptados/$id_usarioIncriptado/$totalIncriptados/$id_eventoIncriptado",
-                'cancel_url'  => env('FRONTEND_URL') . '/pago-cancelado',
+                'success_url' => env('BACKEND_URL') . "/api/pago-exitoso/$asientosIncriptados/$id_usarioIncriptado/$totalIncriptados/$id_eventoIncriptado",
+                'cancel_url'  => env('BACKEND_URL') . '/pago-cancelado',
             ]);
 
             return response()->json([
@@ -491,6 +491,7 @@ class PagosController extends Controller
         }
 
         try {
+             $hoy = Carbon::now('America/Bogota');
 
             // Crear ticket
             $ticket = Ticket::create([
@@ -499,7 +500,7 @@ class PagosController extends Controller
                 'precio' => $total,
                 'estado' => "comprado",
                 "usado" => false,
-                'fecha_compra' => now(),
+                'fecha_compra' => $hoy,
             ]);
 
             if (!$ticket) {

@@ -105,7 +105,10 @@ Route::put("cambiar/correo/empresa/{id}", [EmpresasController::class, "cambiarCo
 Route::get("total-vendido-empresa-año/{id}", [EmpresasController::class, "totalVendidoEmpresaAño"]);
 Route::get("total-eventos-realizados/{id}", [EmpresasController::class, "totalDeEventosRelizadosPorEmpresa"]);
 Route::get("total-asientos-vendidos/{id}", [EmpresasController::class, "totalDeAsientosVendidos"]);
-Route::get("crecimiento-mensual/{id}", [EmpresasController::class, "crecimientoMesAMes"]);
+Route::get("proxima-funcion-empresa/{id}", [EmpresasController::class, "proximaFuncion"]);
+Route::get("entradas-mensuales/{id}", [EmpresasController::class, "entradasMesuales"]);
+Route::get("ultimos-eventos/{id}", [EmpresasController::class, "ultimosTresEventosRealizados"]);
+
 
 //Categorias
 Route::get("listarCategorias", [CategoriasController::class, "index"]);
