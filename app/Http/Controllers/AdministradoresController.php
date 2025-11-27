@@ -8,6 +8,9 @@ use App\Models\Empresas;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+use App\Exports\TicketsEventoExport;
+use Illuminate\Support\Facades\DB;
+use Maatwebsite\Excel\Facades\Excel;
 
 class AdministradoresController extends Controller
 {
@@ -367,5 +370,33 @@ class AdministradoresController extends Controller
             "success" => true,
             "message" => "Correo actualizado, inicia sesión nuevamente."
         ], 200);
+    }
+
+    public function exportarExcel($eventoId)
+    {
+        // Obtener el evento primero
+        $evento = DB::table('eventos')->where('id', $eventoId)->first();
+
+        // Si no existe, devolver error
+        if (!$evento) {
+            return response()->json([
+                "success" => false,
+                "message" => "El evento no existe."
+            ], 404);
+        }
+
+        // Sanitizar nombre para evitar errores en el archivo
+        $nombreEvento = preg_replace('/[^A-Za-z0-9_\-]/', '_', $evento->titulo);
+
+        // Asegurar que no quede vacío después de la sanitización
+        if (trim($nombreEvento) === "") {
+            $nombreEvento = "evento_" . $eventoId;
+        }
+
+        // Descargar Excel con nombre personalizado
+        return Excel::download(
+            new TicketsEventoExport($eventoId),
+            "tickets_evento_{$eventoId}_{$nombreEvento}.xlsx"
+        );
     }
 }

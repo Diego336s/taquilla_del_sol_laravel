@@ -93,6 +93,7 @@ Route::post("registrarAdministradores", [AdministradoresController::class, "stor
 Route::put("actualizarAdministradores/{id}", [AdministradoresController::class, "update"]);
 Route::put("cambiar/clave/admin/{id}", [AdministradoresController::class, "cambiarClave"]);
 Route::put("cambiar/correo/admin/{id}", [AdministradoresController::class, "cambiarCorreo"]);
+Route::get('/exportar/evento/{id}', [AdministradoresController::class, 'exportarExcel']);
 
 //Empresas
 Route::get("listarEmpresas", [EmpresasController::class, "index"]);
