@@ -118,18 +118,48 @@ class AdministradoresController extends Controller
     public function cambiarClave(Request $request, string $id)
     {
         $administradores = Administradores::find($id);
+
         if (!$administradores) {
-            return response()->json(['message' => 'Administrador no encontrado'], 404);
+            return response()->json([
+                "success" => false,
+                "message" => "Administrador no encontrado"
+            ], 404);
         }
 
-        $validatedData = $request->validate([
-            'clave' => 'required|string|min:6',
+        $validator_clave = Validator::make($request->all(), [
+            "clave" => "required|string|min:6"
         ]);
 
-        $administradores->clave = Hash::make($validatedData['clave']);
-        $administradores->save();
-        return response()->json($administradores);
+        if ($validator_clave->fails()) {
+            return response()->json([
+                "success" => false,
+                "message" => "Error de validaciones",
+                "error" => $validator_clave->errors()
+            ], 400);
+        }
+
+        if (Hash::check($request->clave, $administradores->clave)) {
+            return response()->json([
+                "success" => false,
+                "message" => "La contraseña debe ser diferente a la actual.",
+            ]);
+        }
+
+        $administradores->update([
+            "clave" => Hash::make($request->clave)
+        ]);
+
+        $user = $request->user();
+        if ($user && $user->currentAccessToken()) {
+            $user->currentAccessToken()->delete();
+        }
+
+        return response()->json([
+            "success" => true,
+            "message" => "Clave cambiada exitosamente. Inicia sesión nuevamente."
+        ], 200);
     }
+
 
     public function destroy(string $id)
     {
@@ -294,5 +324,48 @@ class AdministradoresController extends Controller
             "success" => false,
             "message" => "Contraseña incorrecta",
         ]);
+    }
+
+    public function cambiarCorreo(Request $request, string $id)
+    {
+        $administradores = Administradores::find($id);
+
+        if (!$administradores) {
+            return response()->json(["message" => "Administrador no encontrado"]);
+        }
+
+        $validator = Validator::make($request->all(), [
+            "correo" => "string|email"
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                "success" => false,
+                "message" => $validator->errors()
+            ], 400);
+        }
+
+        $correoExistenteCliente = clientes::where("correo", $request->correo)->exists();
+        $correoExistenteAdmin = Administradores::where("correo", $request->correo)->exists();
+        $correoExistenteEmpresa = Empresas::where("correo", $request->correo)->exists();
+
+        if ($correoExistenteAdmin || $correoExistenteEmpresa || $correoExistenteCliente) {
+            return response()->json([
+                "success" => false,
+                "message" => "El correo $request->correo ya se encuentra registrado"
+            ]);
+        }
+
+        $administradores->update($validator->validated());
+
+        $user = $request->user();
+        if ($user && $user->currentAccessToken()) {
+            $user->currentAccessToken()->delete();
+        }
+
+        return response()->json([
+            "success" => true,
+            "message" => "Correo actualizado, inicia sesión nuevamente."
+        ], 200);
     }
 }

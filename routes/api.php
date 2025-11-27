@@ -60,7 +60,6 @@ Route::middleware(["auth:sanctum"])->group(function () {
         Route::put("cambiar/clave/cliente/{id}", [ClientesController::class, "cambiarClave"]);
         Route::put("cambiar/correo/cliente/{id}", [ClientesController::class, "cambiarCorreo"]);
         Route::delete('/cliente/eliminar-cuenta/{id}', [ClientesController::class, 'eliminarCuenta']);
-
     });
 });
 
@@ -92,7 +91,8 @@ Route::put("cambiarClave/{id}", [ClientesController::class, "cambiarClave"]);
 Route::get("listarAdministradores", [AdministradoresController::class, "index"]);
 Route::post("registrarAdministradores", [AdministradoresController::class, "store"]);
 Route::put("actualizarAdministradores/{id}", [AdministradoresController::class, "update"]);
-Route::put("cambiarClave/{id}", [AdministradoresController::class, "cambiarClave"]);
+Route::put("cambiar/clave/admin/{id}", [AdministradoresController::class, "cambiarClave"]);
+Route::put("cambiar/correo/admin/{id}", [AdministradoresController::class, "cambiarCorreo"]);
 
 //Empresas
 Route::get("listarEmpresas", [EmpresasController::class, "index"]);
