@@ -13,17 +13,16 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('empresas', function (Blueprint $table) {
-            $table->id();           
+            $table->id();
             $table->string('nombre_empresa');
             $table->string('nit')->unique();
             $table->string('representante_legal');
-            $table->string('documento_representante')->unique();
+            $table->string('documento_representante');
             $table->string('nombre_contacto');
             $table->string('telefono')->nullable();
             $table->string('correo')->unique();
-            $table->string ('clave');
-             $table->timestamps();
-
+            $table->string('clave');
+            $table->timestamps();
         });
     }
 
