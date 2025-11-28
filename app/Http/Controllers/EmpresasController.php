@@ -324,44 +324,44 @@ class EmpresasController extends Controller
     }
 
     public function totalVendidoEmpresaAño($id)
-{
-    $añoActual = now()->year;
-    $mesActual = now()->month;
+    {
+        $añoActual = now()->year;
+        $mesActual = now()->month;
 
-    // 1️⃣ Total vendido por tickets
-    $totalVendido = DB::table('tickets')
-        ->join('eventos', 'tickets.evento_id', '=', 'eventos.id')
-        ->where('eventos.empresa_id', $id)
-        ->where('tickets.estado', 'comprado')
-        ->whereYear('tickets.fecha_compra', $añoActual)
-        ->sum('tickets.precio');
+        // 1️⃣ Total vendido por tickets
+        $totalVendido = DB::table('tickets')
+            ->join('eventos', 'tickets.evento_id', '=', 'eventos.id')
+            ->where('eventos.empresa_id', $id)
+            ->where('tickets.estado', 'comprado')
+            ->whereYear('tickets.fecha_compra', $añoActual)
+            ->sum('tickets.precio');
 
-    // 2️⃣ Total recaudado de la empresa en eventos finalizados
-    $totalEmpresa = DB::table('eventos')
-        ->where('empresa_id', $id)
-        ->where('estado', 'finalizado')
-        ->whereYear('fecha', $añoActual)
-        ->sum('recaudo_empresa');
+        // 2️⃣ Total recaudado de la empresa en eventos finalizados
+        $totalEmpresa = DB::table('eventos')
+            ->where('empresa_id', $id)
+            ->where('estado', 'finalizado')
+            ->whereYear('fecha', $añoActual)
+            ->sum('recaudo_empresa');
 
-    // 3️⃣ Total recaudado del teatro
-    $totalTeatro = DB::table('eventos')
-        ->where('empresa_id', $id)
-        ->where('estado', 'finalizado')
-        ->whereYear('fecha', $añoActual)
-        ->sum('recaudo_teatro');
+        // 3️⃣ Total recaudado del teatro
+        $totalTeatro = DB::table('eventos')
+            ->where('empresa_id', $id)
+            ->where('estado', 'finalizado')
+            ->whereYear('fecha', $añoActual)
+            ->sum('recaudo_teatro');
 
-    // 4️⃣ Porcentaje de meses transcurridos
-    // Ejemplo: si estamos en noviembre → 11 / 12 * 100 = 91.66%
-    $porcentajeMeses = round(($mesActual / 12) * 100, 2);
+        // 4️⃣ Porcentaje de meses transcurridos
+        // Ejemplo: si estamos en noviembre → 11 / 12 * 100 = 91.66%
+        $porcentajeMeses = round(($mesActual / 12) * 100, 2);
 
-    return response()->json([
-        "success" => true,
-        "total_vendido" => $totalVendido,
-        "recaudo_empresa" => $totalEmpresa,
-        "recaudo_teatro" => $totalTeatro,
-        "porcentaje_meses_transcurridos" => $porcentajeMeses
-    ]);
-}
+        return response()->json([
+            "success" => true,
+            "total_vendido" => $totalVendido,
+            "recaudo_empresa" => $totalEmpresa,
+            "recaudo_teatro" => $totalTeatro,
+            "porcentaje_meses_transcurridos" => $porcentajeMeses
+        ]);
+    }
 
 
     public function totalDeEventosRelizadosPorEmpresa($id)
@@ -443,57 +443,55 @@ class EmpresasController extends Controller
         ]);
     }
 
-public function entradasMensuales($empresaId)
-{
-    $añoActual = now()->year;
-    $mesActual = now()->month;
-    $diaActual = now()->day;
+    public function entradasMensuales($empresaId)
+    {
+        $añoActual = now()->year;
+        $mesActual = now()->month;
+        $diaActual = now()->day;
 
-    $entradasMensuales = DB::table('eventos')
-        ->where('empresa_id', $empresaId)
-        ->where('estado', 'finalizado')
-        ->whereYear('fecha', $añoActual)
-        ->selectRaw("
+        $entradasMensuales = DB::table('eventos')
+            ->where('empresa_id', $empresaId)
+            ->where('estado', 'finalizado')
+            ->whereYear('fecha', $añoActual)
+            ->selectRaw("
             MONTH(fecha) as mes,
             SUM(recaudo_empresa) as total_empresa,
             SUM(recaudo_teatro) as total_teatro
         ")
-        ->groupBy('mes')
-        ->orderBy('mes', 'asc')
-        ->get();
+            ->groupBy('mes')
+            ->orderBy('mes', 'asc')
+            ->get();
 
-    foreach ($entradasMensuales as $m) {
+        foreach ($entradasMensuales as $m) {
 
-        // Total días del mes
-        $diasTotalesMes = Carbon::create($añoActual, $m->mes, 1)->daysInMonth;
+            // Total días del mes
+            $diasTotalesMes = Carbon::create($añoActual, $m->mes, 1)->daysInMonth;
 
-        // Calcular días transcurridos según el caso
-        if ($m->mes == $mesActual) {
-            // Mes actual → días que han pasado
-            $m->dias_transcurridos = $diaActual;
+            // Calcular días transcurridos según el caso
+            if ($m->mes == $mesActual) {
+                // Mes actual → días que han pasado
+                $m->dias_transcurridos = $diaActual;
+            } elseif ($m->mes < $mesActual) {
+                // Mes pasado → total días del mes
+                $m->dias_transcurridos = $diasTotalesMes;
+            } else {
+                // Mes futuro → 0
+                $m->dias_transcurridos = 0;
+            }
 
-        } elseif ($m->mes < $mesActual) {
-            // Mes pasado → total días del mes
-            $m->dias_transcurridos = $diasTotalesMes;
-
-        } else {
-            // Mes futuro → 0
-            $m->dias_transcurridos = 0;
+            // Calcular porcentaje
+            if ($diasTotalesMes > 0) {
+                $m->porcentaje_mes = round(($m->dias_transcurridos / $diasTotalesMes) * 100, 2);
+            } else {
+                $m->porcentaje_mes = 0;
+            }
         }
 
-        // Calcular porcentaje
-        if ($diasTotalesMes > 0) {
-            $m->porcentaje_mes = round(($m->dias_transcurridos / $diasTotalesMes) * 100, 2);
-        } else {
-            $m->porcentaje_mes = 0;
-        }
+        return response()->json([
+            "success" => true,
+            "entradasMensuales" => $entradasMensuales
+        ]);
     }
-
-    return response()->json([
-        "success" => true,
-        "entradasMensuales" => $entradasMensuales
-    ]);
-}
 
 
 
@@ -664,4 +662,32 @@ public function entradasMensuales($empresaId)
 
         return $pdf->download("Reporte_Evento_{$evento->titulo}.pdf");
     }
+
+   public function eventosPorEstado($empresaId)
+{
+    $eventos = Eventos::with('categoria')   // ← carga la categoría
+        ->where('empresa_id', $empresaId)
+        ->whereIn('estado', ['activo', 'pendiente', 'cancelado'])
+        ->orderBy('fecha', 'asc')
+        ->get();
+
+    if ($eventos->isEmpty()) {
+        return response()->json([
+            "success" => false,
+            "message" => "No hay eventos con esos estados para esta empresa"
+        ]);
+    }
+
+    // Formatear los datos para incluir categoria->nombre directamente
+    $eventos->transform(function ($ev) {
+        $ev->categoria = $ev->categoria->nombre ?? null;
+        return $ev;
+    });
+
+    return response()->json([
+        "success" => true,
+        "eventos" => $eventos
+    ]);
+}
+
 }

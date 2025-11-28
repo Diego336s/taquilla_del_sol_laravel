@@ -37,10 +37,11 @@ class Eventos extends Model
         return $this->belongsTo(empresas::class, 'empresa_id', "id");
     }
 
-     public function preciosEvento()
-    {
-        return $this->belongsToMany(preciosEvento::class, "evento_id", "id");
-    }
+    public function precios()
+{
+    return $this->hasOne(PreciosEvento::class, 'evento_id');
+}
+
     protected $casts = [
         'fecha_evento' => 'date',
 

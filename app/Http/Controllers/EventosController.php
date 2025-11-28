@@ -401,77 +401,144 @@ class EventosController extends Controller
         }
         return response()->json($eventos);
     }
+
     public function update(Request $request, string $id)
     {
-        $eventos = Eventos::find($id);
 
-        if (!$eventos) {
-            return response()->json(['message' => 'Evento no encontrado']);
+
+        $evento = Eventos::find($id);
+
+        if (!$evento) {
+            return response()->json(['success' => false, 'message' => 'Evento no encontrado']);
         }
 
-        $validator = Validator::make($request->all(), [
-            'titulo'        => 'string|max:200',
-            'descripcion'   => 'nullable|string',
-            'fecha'         => 'date',
-            'hora_inicio'   => 'string|size:8',
-            'hora_final'    => 'string|size:8',
-            'imagen'        => 'nullable|image|max:2048',
-            'estado'        => 'in:activo,pendiente,cancelado,finalizado',
-            'empresa_id'    => 'integer|exists:empresas,id',
-            'categoria_id'  => 'integer|exists:categorias,id',
+        // 🔹 Validación principal (imagen solo requerida si cambia)
+        $validacionEvento = Validator::make($request->all(), [
+            'titulo'        => 'required|string|max:200',
+            'descripcion'   => 'required|string',
+            'fecha'         => 'required|date',
+            'hora_inicio'   => 'required|string',
+            'hora_final'    => 'required|string',
+            'imagen'        => 'nullable|image|mimes:jpg,jpeg,png,webp|max:4096',
+            'estado'        => 'required|in:activo,pendiente,cancelado,finalizado',
+            'empresa_id'    => 'required|integer|exists:empresas,id',
+            'categoria_id'  => 'required|integer|exists:categorias,id',
         ]);
 
-        if ($validator->fails()) {
-            return response()->json($validator->errors(), 422);
+        if ($validacionEvento->fails()) {
+            DB::rollBack();
+            return response()->json([
+                "success" => false,
+                "message" => "Error de validaciones campos evento.",
+                "error" => $validacionEvento->errors()
+            ], 400);
         }
 
-        $validator_datos = $validator->validated();
-        $imagen_file = $request->file('imagen');
+        // 🔹 Validación de precios
+        $validacionPrecios = Validator::make($request->all(), [
+            "precioPrimerPiso" => "required|integer|min:0",
+            "precioSegundoPiso" => "required|integer|min:0",
+            "precioGeneral" => "required|integer|min:0"
+        ]);
 
-        // Separamos la imagen para procesarla por separado
-        if (isset($validator_datos['imagen'])) {
-            unset($validator_datos['imagen']);
+        if ($validacionPrecios->fails()) {
+            DB::rollBack();
+            return response()->json([
+                "success" => false,
+                "message" => "Error de validaciones en precios.",
+                "error" => $validacionPrecios->errors()
+            ]);
+        }
+        DB::beginTransaction();
+        // 🔹 Validar que no haya otro evento activo ese mismo día
+        if (
+            Eventos::where("fecha", $request->fecha)
+            ->where("estado", "activo")
+            ->where("id", "!=", $id)
+            ->exists()
+        ) {
+            DB::rollBack();
+            return response()->json([
+                "success" => false,
+                "message" => "Ya existe un evento activo registrado en esta fecha."
+            ]);
         }
 
-        // LÓGICA PARA ACTUALIZACIÓN DE IMAGEN
-        if ($imagen_file) {
+        try {
 
-            // 1. ELIMINAR la imagen anterior
-            if ($eventos->imagen) {
-                $ruta_relativa_a_disco = str_replace('/storage/', '', $eventos->imagen);
-                if (Storage::disk('public')->exists($ruta_relativa_a_disco)) {
-                    Storage::disk('public')->delete($ruta_relativa_a_disco);
+            $datos = $validacionEvento->validated();
+
+            // 🟧 PROCESAR IMAGEN SI SE ENVÍA
+            if ($request->hasFile("imagen")) {
+
+                // Eliminar imagen anterior
+                if ($evento->imagen) {
+                    $rutaRelativa = str_replace('/storage/', '', $evento->imagen);
+                    Storage::disk('public')->delete($rutaRelativa);
+                }
+
+                // Guardar imagen nueva
+                $file = $request->file("imagen");
+                $carpeta = Str::slug($request->titulo);
+                $nombre = $carpeta . "-" . $evento->id . "." . $file->getClientOriginalExtension();
+
+                $ruta = Storage::disk("public")->putFileAs(
+                    "eventos/" . $carpeta,
+                    $file,
+                    $nombre
+                );
+
+                $datos["imagen"] = Storage::url($ruta);
+            }
+
+            // 🟧 Actualizar evento
+            $evento->update($datos);
+
+            // 🟧 Actualizar precios
+            $precios = DB::table("precios_eventos")
+                ->where("evento_id", $id)
+                ->get();
+
+            foreach ($precios as $p) {
+                switch ($p->ubicacion_id) {
+
+                    case 1: // General
+                        preciosEvento::where("id", $p->id)
+                            ->update(["precio" => $request->precioGeneral]);
+                        break;
+
+                    case 2:
+                    case 3:
+                    case 7: // Primer piso
+                        preciosEvento::where("id", $p->id)
+                            ->update(["precio" => $request->precioPrimerPiso]);
+                        break;
+
+                    case 4:
+                    case 5:
+                    case 6: // Segundo piso
+                        preciosEvento::where("id", $p->id)
+                            ->update(["precio" => $request->precioSegundoPiso]);
+                        break;
                 }
             }
 
-            // 2. Preparar la nueva imagen y carpeta
-            $file = $imagen_file;
+            DB::commit();
 
-            // Usar el nuevo título del request, o el título actual del evento si no se cambia
-            $titulo = $request->input('titulo', $eventos->titulo);
+            return response()->json([
+                "success" => true,
+                "message" => "Evento actualizado $request->titulo correctamente.",
+                "evento"  => $evento
+            ]);
+        } catch (\Exception $e) {
 
-            // Generar la subcarpeta
-            $carpeta_evento = Str::slug($titulo);
-            $extension = $file->getClientOriginalExtension();
-
-            // Nombre de archivo: [slug]-[id].[ext]
-            $nombre_archivo = $carpeta_evento . '-' . $eventos->id . '.' . $extension;
-
-            //  Prefijamos la carpeta dinámica con 'eventos/'
-            $ruta_relativa = Storage::disk('public')->putFileAs(
-                'eventos/' . $carpeta_evento, // DIRECTORIO FINAL: eventos/titanic
-                $file,
-                $nombre_archivo
-            );
-
-            // 3. Añadir la nueva URL al array de datos para la actualización
-            $validator_datos['imagen'] = Storage::url($ruta_relativa);
+            DB::rollBack();
+            return response()->json([
+                "success" => false,
+                "message" => "Error al actualizar el evento.",
+                "error" => $e->getMessage()
+            ]);
         }
-
-        // 4. Actualizar el evento con todos los datos validados y la nueva ruta de imagen
-        $eventos->update($validator_datos);
-
-        return response()->json($eventos);
     }
 
     public function destroy(string $id)
@@ -626,5 +693,64 @@ class EventosController extends Controller
         ]);
     }
 
-   
+
+    public function obtenerEventoCompleto($id)
+    {
+        // 1️⃣ Obtener datos del evento + categoría
+        $evento = DB::table("eventos")
+            ->join("categorias", "eventos.categoria_id", "=", "categorias.id")
+            ->where("eventos.id", $id)
+            ->select(
+                "eventos.*",
+                "categorias.nombre as categoria"
+            )
+            ->first();
+
+        if (!$evento) {
+            return response()->json([
+                "success" => false,
+                "message" => "Evento no encontrado"
+            ]);
+        }
+
+        // 2️⃣ Precios agrupados por ubicacion_id y sin duplicados
+        $precios = DB::table("precios_eventos")
+            ->where("evento_id", $id)
+            ->select("ubicacion_id", "precio")
+            ->distinct()                 // ← evita filas duplicadas
+            ->orderBy("ubicacion_id")    // para orden ordenado
+            ->get();
+
+        $precioPrimerPiso = 0;
+        $precioSegundoPiso = 0;
+        $precioGeneral = 0;
+        foreach ($precios as $item) {
+            switch ($item->ubicacion_id) {
+                case 1:
+                    $precioGeneral = $item->precio;
+                    break;
+                case 2:
+                    $precioPrimerPiso = $item->precio;
+                    break;
+                case 4:
+                    $precioSegundoPiso = $item->precio;
+                    break;
+                default:
+
+                    break;
+            }
+        }
+
+
+        // 3️⃣ Agregar precios al evento en un array
+        $evento->precioPrimerPiso = $precioPrimerPiso;
+        $evento->precioSegundoPiso = $precioSegundoPiso;
+        $evento->precioGeneral = $precioGeneral;
+
+        return response()->json([
+            "success" => true,
+            "evento" => $evento,
+
+        ]);
+    }
 }

@@ -113,7 +113,7 @@ Route::get("entradas-mensuales/{id}", [EmpresasController::class, "entradasMensu
 Route::get("ultimos-eventos/{id}", [EmpresasController::class, "ultimosTresEventosRealizados"]);
 Route::get("eventos-realizados-empresa/{id}", [EmpresasController::class, "eventosRealizados"]);
 Route::get("reporte-evento/{id}", [EmpresasController::class, "reporteEventoPDF"]);
-
+Route::get("historial-eventos/{id}", [EmpresasController::class, "eventosPorEstado"]);
 
 //Categorias
 Route::get("listarCategorias", [CategoriasController::class, "index"]);
@@ -133,6 +133,8 @@ Route::get("proxima-funcion/{id}", [EventosController::class, "proximaFuncion"])
 Route::get("contador/proxima-funcion/{id}", [EventosController::class, "contarFuncionesProximas"]);
 Route::get("contador/funciones-vistas/{id}", [EventosController::class, "contarFuncionesVistas"]);
 Route::get("contador/obras-activas/{id}", [EventosController::class, "contadorObrasActivas"]);
+Route::get("datos-eventos/{id}", [EventosController::class, "obtenerEventoCompleto"]);
+
 
 
 

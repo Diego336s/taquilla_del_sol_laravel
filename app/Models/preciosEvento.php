@@ -19,8 +19,9 @@ class preciosEvento extends Model
        return $this->belongsToMany(asientosEventos::class, "precio_id", "id");
     }
 
-     public function evento(){
-       return $this->belongsToMany(Eventos::class, "evento_id", "id");
-    }
-    
+  public function evento()
+{
+    return $this->belongsTo(Eventos::class, 'evento_id');
+}
+
 }
