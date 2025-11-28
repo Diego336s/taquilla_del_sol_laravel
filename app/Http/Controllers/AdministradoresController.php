@@ -399,4 +399,20 @@ class AdministradoresController extends Controller
             "tickets_evento_{$eventoId}_{$nombreEvento}.xlsx"
         );
     }
+
+    public function totalRecaudadoTeatroAnual()
+    {
+        $añoActual = now()->year;
+
+        $totalTeatro = DB::table('eventos')
+            ->where("estado", "finalizado")
+            ->whereYear("fecha", $añoActual)
+            ->sum("recaudo_teatro");
+
+        return response()->json([
+            "success" => true,
+            "año" => $añoActual,
+            "total_teatro" => $totalTeatro
+        ]);
+    }
 }

@@ -19,6 +19,8 @@ class Eventos extends Model
         'empresa_id',
         'categoria_id',
         'imagen',
+        "recaudo_empresa",
+        "recaudo_teatro",
     ];
     public function categoria()
     {

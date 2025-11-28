@@ -30,12 +30,48 @@ class FinalizarEventos extends Command
 
         $hoy = Carbon::now('America/Bogota')->toDateString();
 
-        DB::table('eventos')
+
+        $hoy = Carbon::now('America/Bogota');
+
+        // 1. Obtener eventos activos cuya fecha ya pasó
+        $eventos = DB::table('eventos')
             ->where('estado', 'activo')
             ->where('fecha', '<', $hoy)
-            ->update([
-                'estado' => 'finalizado'
-            ]);
+            ->get();
+
+        foreach ($eventos as $evento) {
+
+            // === Obtener tickets comprados ===
+            $ticketsIds = DB::table('tickets')
+                ->where('evento_id', $evento->id)
+                ->where('estado', 'comprado')
+                ->pluck('id');
+
+            // === Asientos vendidos ===
+            DB::table('reserva_asientos')
+                ->whereIn('ticket_id', $ticketsIds)
+                ->count();
+
+            // === Total recaudado del evento ===
+            $totalRecaudado = DB::table('tickets')
+                ->whereIn('id', $ticketsIds)
+                ->sum('precio');
+
+            // === Calcular porcentajes ===
+            $empresa = $totalRecaudado * 0.90;
+            $teatro  = $totalRecaudado * 0.10;
+
+            // === Actualizar evento ===
+            DB::table('eventos')
+                ->where('id', $evento->id)
+                ->update([
+                    'estado' => 'finalizado',
+                    'recaudo_empresa' => $empresa,
+                    'recaudo_teatro' => $teatro,
+                    'updated_at' => $hoy
+                ]);
+        }
+
 
         return Command::SUCCESS;
     }

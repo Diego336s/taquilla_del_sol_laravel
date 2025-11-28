@@ -94,6 +94,8 @@ Route::put("actualizarAdministradores/{id}", [AdministradoresController::class, 
 Route::put("cambiar/clave/admin/{id}", [AdministradoresController::class, "cambiarClave"]);
 Route::put("cambiar/correo/admin/{id}", [AdministradoresController::class, "cambiarCorreo"]);
 Route::get('/exportar/evento/{id}', [AdministradoresController::class, 'exportarExcel']);
+Route::get('/total-recaudado-teatro-año', [AdministradoresController::class, 'totalRecaudadoTeatroAnual']);
+
 
 //Empresas
 Route::get("listarEmpresas", [EmpresasController::class, "index"]);
@@ -107,7 +109,7 @@ Route::get("total-vendido-empresa-año/{id}", [EmpresasController::class, "total
 Route::get("total-eventos-realizados/{id}", [EmpresasController::class, "totalDeEventosRelizadosPorEmpresa"]);
 Route::get("total-asientos-vendidos/{id}", [EmpresasController::class, "totalDeAsientosVendidos"]);
 Route::get("proxima-funcion-empresa/{id}", [EmpresasController::class, "proximaFuncion"]);
-Route::get("entradas-mensuales/{id}", [EmpresasController::class, "entradasMesuales"]);
+Route::get("entradas-mensuales/{id}", [EmpresasController::class, "entradasMensuales"]);
 Route::get("ultimos-eventos/{id}", [EmpresasController::class, "ultimosTresEventosRealizados"]);
 Route::get("eventos-realizados-empresa/{id}", [EmpresasController::class, "eventosRealizados"]);
 Route::get("reporte-evento/{id}", [EmpresasController::class, "reporteEventoPDF"]);

@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Barryvdh\Snappy\Facades\SnappyPdf as PDF;
+
 class EmpresasController extends Controller
 {
     /**
@@ -323,19 +324,45 @@ class EmpresasController extends Controller
     }
 
     public function totalVendidoEmpresaAño($id)
-    {
-        $totalVendido = DB::table('tickets')
-            ->join('eventos', 'tickets.evento_id', '=', 'eventos.id')
-            ->where('eventos.empresa_id', $id)
-            ->where('tickets.estado', 'comprado')
-            ->whereYear('tickets.fecha_compra', now()->year)
-            ->sum('tickets.precio');
+{
+    $añoActual = now()->year;
+    $mesActual = now()->month;
 
-        return response()->json([
-            "success" => true,
-            "total_vendido" => $totalVendido
-        ]);
-    }
+    // 1️⃣ Total vendido por tickets
+    $totalVendido = DB::table('tickets')
+        ->join('eventos', 'tickets.evento_id', '=', 'eventos.id')
+        ->where('eventos.empresa_id', $id)
+        ->where('tickets.estado', 'comprado')
+        ->whereYear('tickets.fecha_compra', $añoActual)
+        ->sum('tickets.precio');
+
+    // 2️⃣ Total recaudado de la empresa en eventos finalizados
+    $totalEmpresa = DB::table('eventos')
+        ->where('empresa_id', $id)
+        ->where('estado', 'finalizado')
+        ->whereYear('fecha', $añoActual)
+        ->sum('recaudo_empresa');
+
+    // 3️⃣ Total recaudado del teatro
+    $totalTeatro = DB::table('eventos')
+        ->where('empresa_id', $id)
+        ->where('estado', 'finalizado')
+        ->whereYear('fecha', $añoActual)
+        ->sum('recaudo_teatro');
+
+    // 4️⃣ Porcentaje de meses transcurridos
+    // Ejemplo: si estamos en noviembre → 11 / 12 * 100 = 91.66%
+    $porcentajeMeses = round(($mesActual / 12) * 100, 2);
+
+    return response()->json([
+        "success" => true,
+        "total_vendido" => $totalVendido,
+        "recaudo_empresa" => $totalEmpresa,
+        "recaudo_teatro" => $totalTeatro,
+        "porcentaje_meses_transcurridos" => $porcentajeMeses
+    ]);
+}
+
 
     public function totalDeEventosRelizadosPorEmpresa($id)
     {
@@ -416,23 +443,60 @@ class EmpresasController extends Controller
         ]);
     }
 
-    public function entradasMesuales($empresaId)
-    {
-        $entradasMensuales = DB::table('tickets')
-            ->join('eventos', 'tickets.evento_id', '=', 'eventos.id')
-            ->where('eventos.empresa_id', $empresaId)
-            ->where('tickets.estado', 'comprado')
-            ->whereYear('tickets.fecha_compra', now()->year)
-            ->selectRaw('MONTH(tickets.fecha_compra) as mes, SUM(tickets.precio) as total')
-            ->groupBy('mes')
-            ->orderBy('mes', 'asc')
-            ->get();
+public function entradasMensuales($empresaId)
+{
+    $añoActual = now()->year;
+    $mesActual = now()->month;
+    $diaActual = now()->day;
 
-        return response()->json([
-            "success" => true,
-            "estradasMensuales" => $entradasMensuales
-        ]);
+    $entradasMensuales = DB::table('eventos')
+        ->where('empresa_id', $empresaId)
+        ->where('estado', 'finalizado')
+        ->whereYear('fecha', $añoActual)
+        ->selectRaw("
+            MONTH(fecha) as mes,
+            SUM(recaudo_empresa) as total_empresa,
+            SUM(recaudo_teatro) as total_teatro
+        ")
+        ->groupBy('mes')
+        ->orderBy('mes', 'asc')
+        ->get();
+
+    foreach ($entradasMensuales as $m) {
+
+        // Total días del mes
+        $diasTotalesMes = Carbon::create($añoActual, $m->mes, 1)->daysInMonth;
+
+        // Calcular días transcurridos según el caso
+        if ($m->mes == $mesActual) {
+            // Mes actual → días que han pasado
+            $m->dias_transcurridos = $diaActual;
+
+        } elseif ($m->mes < $mesActual) {
+            // Mes pasado → total días del mes
+            $m->dias_transcurridos = $diasTotalesMes;
+
+        } else {
+            // Mes futuro → 0
+            $m->dias_transcurridos = 0;
+        }
+
+        // Calcular porcentaje
+        if ($diasTotalesMes > 0) {
+            $m->porcentaje_mes = round(($m->dias_transcurridos / $diasTotalesMes) * 100, 2);
+        } else {
+            $m->porcentaje_mes = 0;
+        }
     }
+
+    return response()->json([
+        "success" => true,
+        "entradasMensuales" => $entradasMensuales
+    ]);
+}
+
+
+
 
     public function ultimosTresEventosRealizados($empresaId)
     {
@@ -474,113 +538,130 @@ class EmpresasController extends Controller
 
 
     public function eventosRealizados($empresaId)
-{
-    // Traer todos los eventos realizados (fecha pasada o estado finalizado)
-    $eventos = DB::table('eventos')
-        ->where('empresa_id', $empresaId)
-        ->where('estado', 'finalizado') // O usa fecha < hoy si lo deseas
-        ->orderBy('fecha', 'desc')
-        ->get();
+    {
+        // Traer todos los eventos realizados (fecha pasada o estado finalizado)
+        $eventos = DB::table('eventos')
+            ->where('empresa_id', $empresaId)
+            ->where('estado', 'finalizado') // O usa fecha < hoy si lo deseas
+            ->orderBy('fecha', 'desc')
+            ->get();
 
-    if ($eventos->isEmpty()) {
+        if ($eventos->isEmpty()) {
+            return response()->json([
+                "success" => false,
+                "message" => "No hay eventos realizados para esta empresa"
+            ]);
+        }
+
+        // Mapear cada evento y agregarle estadísticas
+        $eventos = $eventos->map(function ($evento) {
+
+            // 1. Tickets comprados del evento
+            $ticketsIds = DB::table('tickets')
+                ->where('evento_id', $evento->id)
+                ->where('estado', 'comprado')
+                ->pluck('id');
+
+            // 2. Asientos vendidos (reserva_asientos)
+            $asientosVendidos = DB::table('reserva_asientos')
+                ->whereIn('ticket_id', $ticketsIds)
+                ->count();
+
+            // 3. Total dinero recaudado
+            $totalDinero = DB::table('tickets')
+                ->whereIn('id', $ticketsIds)
+                ->sum('precio');
+
+            // 4. Porcentaje de ocupación
+            $capacidad = 270;
+            $ocupacion = $asientosVendidos > 0
+                ? round(($asientosVendidos / $capacidad) * 100, 2)
+                : 0;
+
+            // Agregar datos al objeto evento
+            $evento->asientos_vendidos = $asientosVendidos;
+            $evento->total_dinero = $totalDinero;
+            $evento->porcentaje_ocupacion = $ocupacion;
+
+            return $evento;
+        });
+
         return response()->json([
-            "success" => false,
-            "message" => "No hay eventos realizados para esta empresa"
+            "success" => true,
+            "eventos" => $eventos
         ]);
     }
 
-    // Mapear cada evento y agregarle estadísticas
-    $eventos = $eventos->map(function ($evento) {
+    public function reporteEventoPDF($id)
+    {
+        $evento = DB::table('eventos')->where('id', $id)->first();
 
-        // 1. Tickets comprados del evento
+        if (!$evento) {
+            return response()->json([
+                "success" => false,
+                "message" => "El evento no existe"
+            ], 404);
+        }
+
+        // Obtener empresa del evento
+        $empresa = DB::table('empresas')->where('id', $evento->empresa_id)->first();
+
+        // Tickets comprados
         $ticketsIds = DB::table('tickets')
             ->where('evento_id', $evento->id)
             ->where('estado', 'comprado')
             ->pluck('id');
 
-        // 2. Asientos vendidos (reserva_asientos)
+        // Asientos vendidos
         $asientosVendidos = DB::table('reserva_asientos')
             ->whereIn('ticket_id', $ticketsIds)
             ->count();
 
-        // 3. Total dinero recaudado
+        // Total dinero
         $totalDinero = DB::table('tickets')
             ->whereIn('id', $ticketsIds)
             ->sum('precio');
 
-        // 4. Porcentaje de ocupación
+        // Porcentaje ocupación
         $capacidad = 270;
         $ocupacion = $asientosVendidos > 0
             ? round(($asientosVendidos / $capacidad) * 100, 2)
             : 0;
 
-        // Agregar datos al objeto evento
-        $evento->asientos_vendidos = $asientosVendidos;
-        $evento->total_dinero = $totalDinero;
-        $evento->porcentaje_ocupacion = $ocupacion;
+        $hoy = Carbon::now('America/Bogota');
 
-        return $evento;
-    });
+        $logoPath = public_path("logo_taquilleria.png");
+        $logoBase64 = null;
 
-    return response()->json([
-        "success" => true,
-        "eventos" => $eventos
-    ]);
-}
+        if (file_exists($logoPath)) {
+            $logoBase64 = "data:image/png;base64," . base64_encode(file_get_contents($logoPath));
+        }
 
-public function reporteEventoPDF($id)
-{
-    $evento = DB::table('eventos')->where('id', $id)->first();
 
-    if (!$evento) {
-        return response()->json([
-            "success" => false,
-            "message" => "El evento no existe"
-        ], 404);
+
+        // Datos para PDF
+        $data = [
+            "evento" => $evento,
+            "recaudo_empresa" => $evento->recaudo_empresa,
+            "recaudo_teatro" => $evento->recaudo_teatro,
+            "empresa" => $empresa,                          // ← NOMBRE EMPRESA
+            "asientosVendidos" => $asientosVendidos,
+            "totalDinero" => $totalDinero,
+            "porcentajeOcupacion" => $ocupacion,
+            "fechaReporte" => $hoy,
+            "proyecto" => "Taquillería del Sol",            // ← NOMBRE DEL PROYECTO
+            "logo" => $logoBase64   // ← LOGO DEL PROYECTO
+        ];
+
+        // Generar PDF
+        $pdf = PDF::loadView('reportes.evento', $data)
+            ->setPaper('a4')
+            ->setOption('margin-top', '20mm')
+            ->setOption('margin-bottom', '20mm')
+            ->setOption('margin-left', '15mm')
+            ->setOption('margin-right', '15mm')
+            ->setOption('encoding', 'UTF-8');
+
+        return $pdf->download("Reporte_Evento_{$evento->titulo}.pdf");
     }
-
-    // Tickets comprados
-    $ticketsIds = DB::table('tickets')
-        ->where('evento_id', $evento->id)
-        ->where('estado', 'comprado')
-        ->pluck('id');
-
-    // Asientos vendidos
-    $asientosVendidos = DB::table('reserva_asientos')
-        ->whereIn('ticket_id', $ticketsIds)
-        ->count();
-
-    // Total dinero
-    $totalDinero = DB::table('tickets')
-        ->whereIn('id', $ticketsIds)
-        ->sum('precio');
-
-    // Porcentaje ocupación
-    $capacidad = 270;
-    $ocupacion = $asientosVendidos > 0
-        ? round(($asientosVendidos / $capacidad) * 100, 2)
-        : 0;
-
-    // DATA para la vista
-    $data = [
-        "evento" => $evento,
-        "asientosVendidos" => $asientosVendidos,
-        "totalDinero" => $totalDinero,
-        "porcentajeOcupacion" => $ocupacion,
-        "fechaReporte" => Carbon::now()->format("Y-m-d H:i")
-    ];
-
-    // Generar PDF con SnappyPDF
-    $pdf = PDF::loadView('reportes.evento', $data)
-        ->setPaper('a4')
-        ->setOption('margin-top', '20mm')
-        ->setOption('margin-bottom', '20mm')
-        ->setOption('margin-left', '15mm')
-        ->setOption('margin-right', '15mm')
-        ->setOption('encoding', 'UTF-8');
-
-    return $pdf->download("Reporte_Evento_{$evento->titulo}.pdf");
-}
-
-    
 }
