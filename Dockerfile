@@ -1,25 +1,48 @@
 FROM php:8.2-apache
 
+# Instalar librerías necesarias del sistema
 RUN apt-get update && apt-get install -y \
-    libpng-dev \
-    libjpeg-dev \
+    git \
     zip \
     unzip \
-    git \
-    && docker-php-ext-install pdo pdo_mysql
+    wget \
+    libzip-dev \
+    libpng-dev \
+    libonig-dev \
+    libxml2-dev \
+    libxrender1 \
+    libxext6 \
+    libfontconfig1 \
+    libjpeg62-turbo \
+    fontconfig \
+    xfonts-base \
+    xfonts-75dpi \
+    && docker-php-ext-install pdo pdo_mysql zip
 
+# Descargar wkhtmltopdf
+RUN wget https://github.com/wkhtmltopdf/wkhtmltopdf/releases/download/0.12.6/wkhtmltox_0.12.6-1.bionic_amd64.deb \
+    && apt install -y ./wkhtmltox_0.12.6-1.bionic_amd64.deb
+
+# Habilitar .htaccess
 RUN a2enmod rewrite
 
 WORKDIR /var/www/html
 
+# Copiar proyecto
 COPY . .
 
-RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
-
+# Copiar Composer oficial
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-RUN composer install --no-dev --optimize-autoloader
+# Permisos Laravel
+RUN chmod -R 777 storage bootstrap/cache
 
-RUN php artisan key:generate
+# Instalar paquetes PHP
+RUN COMPOSER_ALLOW_SUPERUSER=1 composer install --no-dev --optimize-autoloader --no-interaction
+
+# Limpiar caché
+RUN php artisan config:clear \
+ && php artisan route:clear \
+ && php artisan view:clear
 
 EXPOSE 80
