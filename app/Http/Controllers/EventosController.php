@@ -542,32 +542,59 @@ class EventosController extends Controller
     }
 
     public function destroy(string $id)
-    {
-        $eventos = Eventos::find($id);
+{
+    DB::beginTransaction();
 
-        if (!$eventos) {
-            return response()->json(['message' => 'evento no encontrado'], 404);
+    try {
+
+        $evento = Eventos::find($id);
+
+        if (!$evento) {
+            return response()->json(['message' => 'Evento no encontrado'], 404);
         }
 
-        // LÓGICA PARA ELIMINAR LA IMAGEN Y SU CARPETA ASOCIADA
-        if ($eventos->imagen) {
-            // 1. Extraer la ruta relativa al disco 'public'.
-            $ruta_relativa_a_disco = str_replace('/storage/', '', $eventos->imagen);
+        // 🔹 1. Eliminar precios relacionados (tabla precios_eventos)
+        DB::table("precios_eventos")
+            ->where("evento_id", $id)
+            ->delete();
 
-            // 2. Obtener la ruta del directorio padre.
-            $ruta_carpeta = dirname($ruta_relativa_a_disco);
+        // 🔹 2. Eliminar la imagen y su carpeta asociada
+        if ($evento->imagen) {
 
-            // 3. Eliminar todo el directorio y su contenido (el archivo de imagen).
-            if (Storage::disk('public')->exists($ruta_carpeta)) {
-                Storage::disk('public')->deleteDirectory($ruta_carpeta);
+            // Ruta relativa dentro de /storage/app/public
+            $ruta_relativa = str_replace('/storage/', '', $evento->imagen);
+
+            // Carpeta donde está la imagen
+            $carpeta = dirname($ruta_relativa);
+
+            // Eliminar carpeta completa si existe
+            if (Storage::disk('public')->exists($carpeta)) {
+                Storage::disk('public')->deleteDirectory($carpeta);
             }
         }
 
-        // 4. Eliminar el registro del evento de la base de datos.
-        $eventos->delete();
+        // 🔹 3. Eliminar el evento
+        $evento->delete();
 
-        return response()->json(['message' => 'Evento eliminado correctamente']);
+        DB::commit();
+
+        return response()->json([
+            'success' => true,
+            'message' => "Evento eliminado correctamente"
+        ]);
+
+    } catch (\Exception $e) {
+
+        DB::rollBack();
+
+        return response()->json([
+            'success' => false,
+            'message' => 'Error al eliminar el evento',
+            'error'   => $e->getMessage()
+        ], 500);
     }
+}
+
 
     public function proximaFuncion($idCliente)
     {
