@@ -1,40 +1,39 @@
-FROM surnet/alpine-wkhtmltopdf:3.16.2-0.12.6-full
+FROM php:8.2-apache
 
-# Instalar PHP y Apache
-RUN apk add --no-cache \
-    php82 \
-    php82-apache2 \
-    php82-pdo \
-    php82-pdo_mysql \
-    php82-mbstring \
-    php82-xml \
-    php82-zip \
-    php82-gd \
-    php82-openssl \
-    php82-session \
-    php82-curl \
+# Instalar dependencias del sistema
+RUN apt-get update && apt-get install -y \
     git \
+    zip \
     unzip \
-    curl \
-    apache2
+    libzip-dev \
+    libpng-dev \
+    libonig-dev \
+    libxml2-dev \
+    fonts-dejavu \
+    xfonts-base \
+    wkhtmltopdf \
+    && docker-php-ext-install pdo pdo_mysql zip
 
-# Configurar Apache
-RUN sed -i 's#/var/www/localhost/htdocs#/var/www/html#' /etc/apache2/httpd.conf && \
-    sed -i 's/AllowOverride None/AllowOverride All/g' /etc/apache2/httpd.conf
+# Habilitar mod_rewrite
+RUN a2enmod rewrite
 
 WORKDIR /var/www/html
 
+# Copiar proyecto
 COPY . .
 
-# Instalar Composer
-RUN curl -sS https://getcomposer.org/installer | php82 -- --install-dir=/usr/bin --filename=composer
+# Copiar Composer
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# Permisos Laravel
+# Permisos
 RUN chmod -R 777 storage bootstrap/cache
 
-# Instalar dependencias Laravel
+# Instalar dependencias
 RUN COMPOSER_ALLOW_SUPERUSER=1 composer install --no-dev --optimize-autoloader --no-interaction --ignore-platform-reqs
 
-EXPOSE 80
+# Limpiar cache
+RUN php artisan config:clear \
+ && php artisan route:clear \
+ && php artisan view:clear
 
-CMD ["httpd", "-D", "FOREGROUND"]
+EXPOSE 80
